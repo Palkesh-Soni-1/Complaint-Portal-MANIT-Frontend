@@ -12,12 +12,12 @@ function Home() {
     start: "Jan 12",
     end: "Mar 11",
   });
-  const [showSolved, setShowSolved] = useState(true);
+  const [showresolved, setShowresolved] = useState(true);
 
 
 
   // const complaints = [
-  //   { id: "123456", date: "11 April 2025", type: "Academic", status: "Solved" },
+  //   { id: "123456", date: "11 April 2025", type: "Academic", status: "resolved" },
   //   {
   //     id: "123456",
   //     date: "11 April 2025",
@@ -65,7 +65,7 @@ function Home() {
         {/* Header */}
         <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-4 border-b border-blue-300 flex justify-between items-center ">
           <h1 className="text-lg font-bold text-blue-100">
-            Complaints ( 258 )
+            Complaints ( {complaints.length} )
           </h1>
         </div>
 
@@ -100,7 +100,7 @@ function Home() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                <span className="text-sm">Solved</span>
+                <span className="text-sm">resolved</span>
               </div>
             </div>
           </div>
@@ -125,9 +125,9 @@ function Home() {
                 {complaint.complaintType}
               </div>
               <div className="p-4">
-                {complaint.status === "solved" && (
+                {complaint.status === "resolved" && (
                   <div className="bg-green-200 text-green-800 px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center justify-center">
-                    Solved
+                    Resolved
                   </div>
                 )}
                 {complaint.status === "open" && (
@@ -136,9 +136,9 @@ function Home() {
                     {/* {complaint.isEscalated && <span className="ml-1">ICU</span>} */}
                   </div>
                 )}
-                {complaint.status === "process" && (
+                {complaint.status === "processing" && (
                   <div className="bg-yellow-300 text-yellow-800 px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center justify-center">
-                    Process
+                    Processing
                   </div>
                 )}
               </div>
