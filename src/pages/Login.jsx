@@ -28,7 +28,7 @@ const Login = () => {
                 Welcome Back
               </h2>
               <p className="text-center">
-                Please Login <br /> using your LDAP ID and Password
+                Please Login <br /> using your Student ID and Password
               </p>
             </div>
           </div>

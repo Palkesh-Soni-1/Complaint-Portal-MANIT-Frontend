@@ -1,30 +1,63 @@
 // App.jsx
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Download, Search, Check, Clock, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 function Home() {
+
+  const {auth} = useAuth();
+
+
   const [dateRange, setDateRange] = useState({
     start: "Jan 12",
     end: "Mar 11",
   });
   const [showSolved, setShowSolved] = useState(true);
 
-  const complaints = [
-    { id: "123456", date: "11 April 2025", type: "Academic", status: "Solved" },
-    {
-      id: "123456",
-      date: "11 April 2025",
-      type: "Academic",
-      status: "Open",
-      isEscalated: true,
-    },
-    {
-      id: "123456",
-      date: "11 April 2025",
-      type: "Academic",
-      status: "Process",
-    },
-  ];
+
+
+  // const complaints = [
+  //   { id: "123456", date: "11 April 2025", type: "Academic", status: "Solved" },
+  //   {
+  //     id: "123456",
+  //     date: "11 April 2025",
+  //     type: "Academic",
+  //     status: "Open",
+  //     isEscalated: true,
+  //   },
+  //   {
+  //     id: "123456",
+  //     date: "11 April 2025",
+  //     type: "Academic",
+  //     status: "Process",
+  //   },
+  // ];
+
+  const [complaints,setComplaints] = useState([]);
+
+
+  useEffect(()=>{
+    const fetchComplaintsById= async()=>{
+      try{
+        const res = await fetch(`http://localhost:3000/complaint/get?studentId=${auth?.userData?.studentId}`);
+        if(res.ok){
+          const data = (await res.json()).data;
+          setComplaints(data);
+        }
+      }
+      catch(err){
+        console.log("FailedToFetch");
+      }
+      finally{
+        // loading hatana hai
+      }
+    }
+    if(auth){
+      fetchComplaintsById();
+    }
+  },[])
+
+
 
   return (
     <div className="max-w-4xl mx-auto my-10 p-4 font-sans min-h-screen bg-blue-300 rounded-xl">
@@ -86,24 +119,24 @@ function Home() {
               key={index}
               className="grid grid-cols-4 border-b border-blue-300 text-sm hover:bg-blue-50"
             >
-              <div className="p-4 text-blue-600">{complaint.id}</div>
-              <div className="p-4 text-gray-600">{complaint.date}</div>
+              <div className="p-4 text-blue-600">{complaint.complaintNumber}</div>
+              <div className="p-4 text-gray-600">{complaint.dateReported}</div>
               <div className="p-4 text-blue-800 font-medium">
-                {complaint.type}
+                {complaint.complaintType}
               </div>
               <div className="p-4">
-                {complaint.status === "Solved" && (
+                {complaint.status === "solved" && (
                   <div className="bg-green-200 text-green-800 px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center justify-center">
                     Solved
                   </div>
                 )}
-                {complaint.status === "Open" && (
+                {complaint.status === "open" && (
                   <div className="bg-red-500 text-white px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center justify-center">
                     Open
                     {/* {complaint.isEscalated && <span className="ml-1">ICU</span>} */}
                   </div>
                 )}
-                {complaint.status === "Process" && (
+                {complaint.status === "process" && (
                   <div className="bg-yellow-300 text-yellow-800 px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center justify-center">
                     Process
                   </div>

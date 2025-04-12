@@ -1,15 +1,17 @@
 import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const ComplaintForm = () => {
+  const {auth} = useAuth();
   const [formData, setFormData] = useState({
-    studentId: "",
-    studentName: "",
+    studentId: auth?.userData?.studentId,
+    studentName: auth?.userData?.fullName,
     roomNumber: "",
     hostelNumber: "",
     complaintType: "",
     complaintSubType: "",
     description: "",
-    dateReported: "",
+    dateReported: new Date().toISOString().split("T")[0],
     attachments: [],
   });
   const [errors, setErrors] = useState({});
@@ -118,13 +120,29 @@ const ComplaintForm = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      console.log("Form Data Submitted: ", formData);
-      // Handle the form submission here
-      // API calls
+      try{
+        const res = await fetch("http://localhost:3000/complaint/post", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+        if (res.ok) {
+          alert("Complaint Submitted Successfully");
+          console.log(await res.json())
+        }
+      }
+      catch(error){
+        console.error("Error:", error)
+      }
+      finally{
+
+      }
     } else {
       setErrors(validationErrors);
     }
@@ -143,7 +161,8 @@ const ComplaintForm = () => {
             name="studentId"
             value={formData.studentId}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={true}
+            className="w-full cursor-not-allowed px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.studentId && (
             <p className="text-red-300">{errors.studentId}</p>
@@ -160,7 +179,8 @@ const ComplaintForm = () => {
             name="studentName"
             value={formData.studentName}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={true}
+            className="w-full cursor-not-allowed px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.studentName && (
             <p className="text-red-300">{errors.studentName}</p>
@@ -171,14 +191,20 @@ const ComplaintForm = () => {
           <label htmlFor="hostelNumber" className="block text-white">
             Hostel Number
           </label>
-          <input
-            type="text"
+          <select
             id="hostelNumber"
             name="hostelNumber"
             value={formData.hostelNumber}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          >
+            <option value="">Select Hostel</option>
+            {[...Array(12)].map((_, index) => (
+              <option key={index} value={`H${index + 1}`}>
+                H{index + 1}
+              </option>
+            ))}
+          </select>
           {errors.hostelNumber && (
             <p className="text-red-300">{errors.hostelNumber}</p>
           )}
@@ -279,6 +305,7 @@ const ComplaintForm = () => {
             id="dateReported"
             name="dateReported"
             value={formData.dateReported}
+            disabled="true"
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

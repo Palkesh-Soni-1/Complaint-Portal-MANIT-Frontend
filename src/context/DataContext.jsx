@@ -7,9 +7,11 @@ export const DataProvider = ({ children }) => {
   
 
 
+
+
   return (
     <DataContext.Provider
-      value={{  }}
+      value={{ studentData,setStudentdata }}
     >
       {children}
     </DataContext.Provider>
