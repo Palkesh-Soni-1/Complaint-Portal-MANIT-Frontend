@@ -20,22 +20,43 @@ export const AuthProvider = ({ children }) => {
   const login = async (ldapId, password) => {
     setIsLoading(true);
     try {
-      // try {
-      // const response = await fetch("/api/authenticate", {
+
+      // ----------------- ADMIN --------------------
+      if (ldapId === "admin" && password === "123") {
+        authData = {
+          userData: { ldapId, name: "Admin User" },
+          token: "admin-token",
+          role: "admin",
+        };
+        setAuth(authData);
+        localStorage.setItem("auth", JSON.stringify(authData));
+        return;
+      }
+
+      // ----------------- STUDENT -------------------
+      // const response = await fetch("https://erpapi.manit.ac.in/api/logintest", {
       //   method: "POST",
       //   headers: {
       //     "Content-Type": "application/json",
       //   },
-      //   body: JSON.stringify({ ldapId, password }),
+      //   body: JSON.stringify({ username:ldapId, password }),
       // });
 
       // const result = await response.json();
+      // let authData;
       // if (response.ok) {
-      //     setAuth({ userData: result.user, token: result.token, role: result.role });
+      //     console.log(result)
+      //     authData = {
+      //       userData: result.user,
+      //       token: result.token,
+      //       role: "student",
+      //     };
+      //     setAuth(authData);
       // } else {
       //   throw new Error(result.error || "Authentication failed");
       // }
-      // Mock-Auth
+      // localStorage.setItem("auth", JSON.stringify(authData));
+
       let authData;
       if (ldapId === "student" && password === "123") {
         authData = {

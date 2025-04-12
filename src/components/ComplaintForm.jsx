@@ -7,11 +7,11 @@ const ComplaintForm = () => {
     roomNumber: "",
     hostelNumber: "",
     complaintType: "",
+    complaintSubType: "",
     description: "",
     dateReported: "",
     attachments: [],
   });
-
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -24,6 +24,8 @@ const ComplaintForm = () => {
       newErrors.hostelNumber = "Hostel Number is required";
     if (!formData.complaintType)
       newErrors.complaintType = "Complaint Type is required";
+    if (!formData.complaintSubType)
+      newErrors.complaintSubType = "Complaint SubType is required";
     if (!formData.description)
       newErrors.description = "Description is required";
     if (!formData.dateReported)
@@ -31,8 +33,89 @@ const ComplaintForm = () => {
     return newErrors;
   };
 
+  const complaintTypes = [
+    "Academic",
+    "Hostel",
+    "Scholarship",
+    "Medical",
+    "Department",
+    "Sports",
+    "Ragging",
+  ];
+
+  const complaintSubTypes = {
+    Academic: [
+      "Course Registration",
+      "Grading Issues",
+      "Faculty Complaint",
+      "Attendance",
+      "Examination",
+      "Others",
+    ],
+    Hostel: [
+      "Maintenance",
+      "Room Allocation",
+      "Cleanliness",
+      "Facility Issues",
+      "Roommate Issues",
+      "Others",
+    ],
+    Scholarship: [
+      "Disbursement Delay",
+      "Amount Discrepancy",
+      "Eligibility Issues",
+      "Documentation",
+      "Others",
+    ],
+    Medical: [
+      "Health Center Services",
+      "Emergency Response",
+      "Medical Leave",
+      "Insurance Issues",
+      "Others",
+    ],
+    Department: [
+      "Lab Equipment",
+      "Classroom Issues",
+      "Department Staff",
+      "Resources",
+      "Others",
+    ],
+    Sports: [
+      "Equipment",
+      "Facility Access",
+      "Team Selection",
+      "Coaching Issues",
+      "Events",
+      "Others",
+    ],
+    Ragging: [
+      "Physical Harassment",
+      "Verbal Abuse",
+      "Forced Activity",
+      "Bullying",
+      "Others",
+    ],
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "complaintType") {
+      setFormData({
+        ...formData,
+        [name]: value,
+        complaintSubType: "",
+      });
+      if (errors.complaintSubType) {
+        setErrors({
+          ...errors,
+          complaintSubType: null,
+        });
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -40,9 +123,7 @@ const ComplaintForm = () => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
       console.log("Form Data Submitted: ", formData);
-
       // Handle the form submission here
-
       // API calls
     } else {
       setErrors(validationErrors);
@@ -87,7 +168,7 @@ const ComplaintForm = () => {
         </div>
 
         <div className="mb-4">
-          <label htmlFor="studentName" className="block text-white">
+          <label htmlFor="hostelNumber" className="block text-white">
             Hostel Number
           </label>
           <input
@@ -132,16 +213,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select a type</option>
-            {[
-              "Maintenance",
-              "Hygiene",
-              "Security",
-              "Mess",
-              "Bathroom",
-              "Room",
-              "Noise",
-              "Other",
-            ].map((type) => (
+            {complaintTypes.map((type) => (
               <option key={type} value={type}>
                 {type}
               </option>
@@ -149,6 +221,35 @@ const ComplaintForm = () => {
           </select>
           {errors.complaintType && (
             <p className="text-red-500">{errors.complaintType}</p>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="complaintSubType" className="block text-white">
+            Complaint Sub-Type
+          </label>
+          <select
+            id="complaintSubType"
+            name="complaintSubType"
+            value={formData.complaintSubType}
+            onChange={handleChange}
+            disabled={!formData.complaintType}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:cursor-not-allowed"
+          >
+            <option value="">
+              {formData.complaintType
+                ? "Select a sub-type"
+                : "Select complaint type first"}
+            </option>
+            {formData.complaintType &&
+              complaintSubTypes[formData.complaintType]?.map((subType) => (
+                <option key={subType} value={subType}>
+                  {subType}
+                </option>
+              ))}
+          </select>
+          {errors.complaintSubType && (
+            <p className="text-red-500">{errors.complaintSubType}</p>
           )}
         </div>
 

@@ -167,7 +167,7 @@ const Navbar = () => {
       </div>
       {isFixed && (
         <div
-          className="bg-[#1677c8]"
+          className="bg-blue-900"
           style={{ height: auth === null ? "50px" : "100px" }}
         ></div>
       )}
