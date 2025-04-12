@@ -39,7 +39,7 @@ function Home() {
   useEffect(()=>{
     const fetchComplaintsById= async()=>{
       try{
-        const res = await fetch(`http://localhost:3000/complaint/get?studentId=${auth?.userData?.studentId}`);
+        const res = await fetch(`${import.meta.env.VITE_SITE}/complaint/get?studentId=${auth?.userData?.studentId}`);
         if(res.ok){
           const data = (await res.json()).data;
           setComplaints(data);

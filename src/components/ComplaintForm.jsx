@@ -125,7 +125,7 @@ const ComplaintForm = () => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
       try{
-        const res = await fetch("http://localhost:3000/complaint/post", {
+        const res = await fetch(`${import.meta.env.VITE_SITE}/complaint/post`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

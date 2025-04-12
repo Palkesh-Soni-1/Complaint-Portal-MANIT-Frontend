@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       // ----------------- STUDENT -------------------
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch(`${import.meta.env.VITE_SITE}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

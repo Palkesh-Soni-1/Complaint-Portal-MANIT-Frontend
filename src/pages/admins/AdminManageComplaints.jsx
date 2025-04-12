@@ -29,14 +29,14 @@ const AdminManageComplaints = () => {
       // setIsLoading(true);
       
       // Call the API to update the status
-      const response = await fetch('http://localhost:3000/complaint/status', {
-        method: 'PATCH',
+      const response = await fetch(`${import.meta.env.VITE_SITE}/complaint/status`, {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           complaintId: id,
-          status: newStatus
+          status: newStatus,
         }),
       });
       
