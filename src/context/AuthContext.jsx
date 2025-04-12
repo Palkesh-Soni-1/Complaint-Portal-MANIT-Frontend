@@ -6,6 +6,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(null);
+  const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
       // ----------------- ADMIN --------------------
       if (ldapId === "admin" && password === "123") {
-        authData = {
+        let authData = {
           userData: { ldapId, name: "Admin User" },
           token: "admin-token",
           role: "admin",
@@ -102,7 +103,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ auth, login, logout, isLoading, setIsLoading }}
+      value={{ auth, login, logout, isLoading, setIsLoading,complaints, setComplaints }}
     >
       {children}
     </AuthContext.Provider>
