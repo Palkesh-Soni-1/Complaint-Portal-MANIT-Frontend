@@ -146,7 +146,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.studentId && (
-            <p className="text-red-500">{errors.studentId}</p>
+            <p className="text-red-300">{errors.studentId}</p>
           )}
         </div>
 
@@ -163,7 +163,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.studentName && (
-            <p className="text-red-500">{errors.studentName}</p>
+            <p className="text-red-300">{errors.studentName}</p>
           )}
         </div>
 
@@ -180,7 +180,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.hostelNumber && (
-            <p className="text-red-500">{errors.hostelNumber}</p>
+            <p className="text-red-300">{errors.hostelNumber}</p>
           )}
         </div>
 
@@ -197,7 +197,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.roomNumber && (
-            <p className="text-red-500">{errors.roomNumber}</p>
+            <p className="text-red-300">{errors.roomNumber}</p>
           )}
         </div>
 
@@ -220,7 +220,7 @@ const ComplaintForm = () => {
             ))}
           </select>
           {errors.complaintType && (
-            <p className="text-red-500">{errors.complaintType}</p>
+            <p className="text-red-300">{errors.complaintType}</p>
           )}
         </div>
 
@@ -249,7 +249,7 @@ const ComplaintForm = () => {
               ))}
           </select>
           {errors.complaintSubType && (
-            <p className="text-red-500">{errors.complaintSubType}</p>
+            <p className="text-red-300">{errors.complaintSubType}</p>
           )}
         </div>
 
@@ -266,7 +266,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.description && (
-            <p className="text-red-500">{errors.description}</p>
+            <p className="text-red-300">{errors.description}</p>
           )}
         </div>
 
@@ -283,7 +283,7 @@ const ComplaintForm = () => {
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.dateReported && (
-            <p className="text-red-500">{errors.dateReported}</p>
+            <p className="text-red-300">{errors.dateReported}</p>
           )}
         </div>
 

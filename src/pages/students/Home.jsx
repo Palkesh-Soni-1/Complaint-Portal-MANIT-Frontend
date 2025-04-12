@@ -31,14 +31,9 @@ function Home() {
       <div className=" overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-4 border-b border-blue-300 flex justify-between items-center ">
-          <h1 className="text-lg font-bold text-blue-900">
+          <h1 className="text-lg font-bold text-blue-100">
             Complaints ( 258 )
           </h1>
-          <div className="flex items-center gap-2">
-            <button className="text-gray-200 text-sm hover:underline">
-              View list of Complaints Below
-            </button>
-          </div>
         </div>
 
         {/* Search bar */}
@@ -55,7 +50,7 @@ function Home() {
           </div>
           <button className="flex items-center gap-2 text-sm bg-white border border-gray-300 rounded-md px-3 py-1">
             <Download size={18} />
-            Download as CSV
+            <p className="max-sm:hidden">Download as CSV</p>
           </button>
         </div>
 
