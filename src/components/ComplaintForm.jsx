@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useData } from "../context/DataContext";
 
 const ComplaintForm = () => {
-  const {auth} = useAuth();
+  const {info}=useData();
   const [formData, setFormData] = useState({
-    studentId: auth?.userData?.studentId,
-    studentName: auth?.userData?.fullName,
+    studentId: info?.studentId,
+    studentName: info?.fullName,
     roomNumber: "",
     hostelNumber: "",
     complaintType: "",

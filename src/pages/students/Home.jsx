@@ -10,10 +10,12 @@ import {
   Filter,
   ChevronRight,
 } from "lucide-react";
+import { useData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
 
 function Home() {
-  const { auth } = useAuth();
+  const {auth}=useAuth();
+  const {info}=useData();
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ function Home() {
       try {
         const res = await fetch(
           `${import.meta.env.VITE_SITE}/complaint/get?studentId=${
-            auth?.userData?.studentId
+            info?.studentId
           }`
         );
         if (res.ok) {
@@ -48,10 +50,10 @@ function Home() {
       }
     };
 
-    if (auth) {
+    if (auth && info?.studentId) {
       fetchComplaintsById();
     }
-  }, [auth]);
+  }, [auth,info]);
 
   useEffect(() => {
     applyFilters();

@@ -26,13 +26,12 @@ import {
   ShieldAlert,
   AtSign,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useData } from "../../context/DataContext";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("personal");
-
-  const {auth} = useAuth();
-  const studentData=auth.userData;
+  const {info} = useData();
+  const studentData=info;
 
   return (
     <div className="max-w-4xl my-4 rounded-lg mx-auto px-1 py-8  min-h-screen">

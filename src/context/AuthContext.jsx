@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import converter from "../services/studentDataConversion";
+import { studentLogin } from "../services/studentDataFetch";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -35,30 +36,42 @@ export const AuthProvider = ({ children }) => {
       }
 
       // ----------------- STUDENT -------------------
-      const response = await fetch(`${import.meta.env.VITE_SITE}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username:ldapId, password }),
-      });
 
-      const result = await response.json();
-      let authData;
-      if (response.ok) {
-          console.log(result)
-          authData = {
-            userData: converter(result.userData),
-            // token: result.token,
-            token:"hello",
-            role: "student",
-          };
-          setAuth(authData);
-      } else {
-        throw new Error(result.error || "Authentication failed");
-      }
+      const res = await studentLogin({username:ldapId,password});
+      const authData = {
+        userData: res,
+        token: res.token,
+        role: "student",
+      };
+      setAuth(authData);
       localStorage.setItem("auth", JSON.stringify(authData));
 
+
+      // const response = await fetch(`${import.meta.env.VITE_SITE}/login`, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ username:ldapId, password }),
+      // });
+
+      // const result = await response.json();
+      // let authData;
+      // if (response.ok) {
+      //     console.log(result)
+      //     authData = {
+      //       userData: converter(result.userData),
+      //       // token: result.token,
+      //       token:"hello",
+      //       role: "student",
+      //     };
+      //     setAuth(authData);
+      // } else {
+      //   throw new Error(result.error || "Authentication failed");
+      // }
+      // localStorage.setItem("auth", JSON.stringify(authData));
+
+      //MockAuth
       // let authData;
       // if (ldapId === "student" && password === "123") {
       //   authData = {
