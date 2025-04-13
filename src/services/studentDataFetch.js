@@ -16,7 +16,7 @@ async function studentLogin({ username, password }) {
     }
 
     const data = await response.json();
-    console.log("Login successful:", data);
+    // console.log("Login successful:", data);
     localStorage.setItem("token",data.token);
     return data;
   } catch (err) {
@@ -44,7 +44,7 @@ async function studentProfile({ uid }) {
     }
 
     const data = await response.json();
-    console.log("Student Profile fetch successful:", data);
+    // console.log("Student Profile fetch successful:", data);
     return data;
   } catch (err) {
     console.error("Student Profile fetch error:", err);
@@ -70,7 +70,7 @@ async function studentProfileCheck({ uid }) {
     }
 
     const data = await response.json();
-    console.log("Student Profile fetch successful:", data);
+    // console.log("Student Profile fetch successful:", data);
     return data;
   } catch (err) {
     console.error("Student Profile fetch error:", err);
@@ -96,7 +96,7 @@ async function studentResult({ uid }) {
     }
 
     const data = await response.json();
-    console.log("Student Profile fetch successful:", data);
+    // console.log("Student Profile fetch successful:", data);
     return data;
   } catch (err) {
     console.error("Student Profile fetch error:", err);

@@ -30,7 +30,7 @@ export const DataProvider = ({ children }) => {
         information.resultData=data;
         console.log("information:",information)
 
-        setInfo(infoConverter(information))
+        // setInfo(infoConverter(information))
       } catch (err) {
         console.log("Failed to fetch dur to: ",err);
       }
