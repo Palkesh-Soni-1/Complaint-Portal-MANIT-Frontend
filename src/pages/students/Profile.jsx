@@ -48,7 +48,7 @@ export default function Profile() {
               <div className="w-full h-full bg-gradient-to-br from-white/80 to-white/40 rounded-full p-2">
                 <div className="w-full h-full rounded-full overflow-hidden bg-white">
                   <img
-                    src={`${studentData.profileImage}`}
+                    src={`${studentData?.profileImage}`}
                     alt="Profile"
                     className="w-full h-full object-fill"
                   />
@@ -63,19 +63,19 @@ export default function Profile() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 className="text-3xl font-bold">{studentData.name}</h2>
+            <h2 className="text-3xl font-bold">{studentData?.name}</h2>
             <p className="text-lg text-white/90 mt-1">
-              {studentData.department}
+              {studentData?.department}
             </p>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
               <span className="bg-white/20 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full font-medium flex items-center">
                 <Hash className="w-4 h-4 mr-1" />
-                {studentData.studentId}
+                {studentData?.studentId}
               </span>
               <span className="bg-white/20 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full font-medium flex items-center">
                 <Calendar className="w-4 h-4 mr-1" />
-                {studentData.semester}
+                {studentData?.semester}
               </span>
             </div>
           </motion.div>
@@ -173,7 +173,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Full Name</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.fullName}
+                    {studentData?.fullName}
                   </p>
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Date of Birth</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.dateOfBirth}
+                    {studentData?.dateOfBirth}
                   </p>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Marital Status</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.maritalStatus}
+                    {studentData?.maritalStatus}
                   </p>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Nationality</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.nationality}
+                    {studentData?.nationality}
                   </p>
                 </div>
               </div>
@@ -209,7 +209,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Blood Group</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.bloodGroup}
+                    {studentData?.bloodGroup}
                   </p>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Mother Tongue</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.motherTongue}
+                    {studentData?.motherTongue}
                   </p>
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Caste</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.caste}
+                    {studentData?.caste}
                   </p>
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Gender</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.gender}
+                    {studentData?.gender}
                   </p>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Hostel</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.hostel}
+                    {studentData?.hostel}
                   </p>
                 </div>
               </div>
@@ -254,7 +254,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Room No</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.roomNo}
+                    {studentData?.roomNo}
                   </p>
                 </div>
               </div>
@@ -274,7 +274,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Department</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.department}
+                    {studentData?.department}
                   </p>
                 </div>
               </div>
@@ -283,7 +283,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Student ID</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.studentId}
+                    {studentData?.studentId}
                   </p>
                 </div>
               </div>
@@ -292,7 +292,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Current Semester</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.semester}
+                    {studentData?.semester}
                   </p>
                 </div>
               </div>
@@ -301,7 +301,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Enrollment Date</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.enrollmentDate}
+                    {studentData?.enrollmentDate}
                   </p>
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function Profile() {
                 <Award className="w-5 h-5 text-indigo-500 mt-1 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">GPA</p>
-                  <p className="font-medium text-gray-800">{studentData.gpa}</p>
+                  <p className="font-medium text-gray-800">{studentData?.gpa}</p>
                 </div>
               </div>
               <div className="flex items-start">
@@ -317,7 +317,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Academic Advisor</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.academicAdvisor}
+                    {studentData?.academicAdvisor}
                   </p>
                 </div>
               </div> */}
@@ -342,7 +342,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Father's Name</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.fatherName}
+                        {studentData?.fatherName}
                       </p>
                     </div>
                   </div>
@@ -353,7 +353,7 @@ export default function Profile() {
                         Father's Profession
                       </p>
                       <p className="font-medium text-gray-800">
-                        {studentData.fatherProfession}
+                        {studentData?.fatherProfession}
                       </p>
                     </div>
                   </div>
@@ -362,7 +362,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Mother's Name</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.motherName}
+                        {studentData?.motherName}
                       </p>
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export default function Profile() {
                         Mother's Profession
                       </p>
                       <p className="font-medium text-gray-800">
-                        {studentData.motherProfession}
+                        {studentData?.motherProfession}
                       </p>
                     </div>
                   </div>
@@ -382,7 +382,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Parents' Address</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.parentsAddress}
+                        {studentData?.parentsAddress}
                       </p>
                     </div>
                   </div>
@@ -391,7 +391,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Parents' Phone</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.parentsPhone}
+                        {studentData?.parentsPhone}
                       </p>
                     </div>
                   </div>
@@ -400,7 +400,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Parents' Email</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.parentsEmail}
+                        {studentData?.parentsEmail}
                       </p>
                     </div>
                   </div>
@@ -417,7 +417,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Guardian's Name</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.guardianName}
+                        {studentData?.guardianName}
                       </p>
                     </div>
                   </div>
@@ -428,7 +428,7 @@ export default function Profile() {
                         Relationship with Guardian
                       </p>
                       <p className="font-medium text-gray-800">
-                        {studentData.relationshipWithGuardian}
+                        {studentData?.relationshipWithGuardian}
                       </p>
                     </div>
                   </div>
@@ -439,7 +439,7 @@ export default function Profile() {
                         Guardian's Address
                       </p>
                       <p className="font-medium text-gray-800">
-                        {studentData.guardianAddress}
+                        {studentData?.guardianAddress}
                       </p>
                     </div>
                   </div>
@@ -448,7 +448,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Guardian's Phone</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.guardianPhone}
+                        {studentData?.guardianPhone}
                       </p>
                     </div>
                   </div>
@@ -457,7 +457,7 @@ export default function Profile() {
                     <div>
                       <p className="text-sm text-gray-500">Guardian's Email</p>
                       <p className="font-medium text-gray-800">
-                        {studentData.guardianEmail}
+                        {studentData?.guardianEmail}
                       </p>
                     </div>
                   </div>
@@ -479,7 +479,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Phone Number</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.phoneNumber}
+                    {studentData?.phoneNumber}
                   </p>
                 </div>
               </div>
@@ -490,7 +490,7 @@ export default function Profile() {
                     Alternate Phone Number
                   </p>
                   <p className="font-medium text-gray-800">
-                    {studentData.alternatePhoneNumber}
+                    {studentData?.alternatePhoneNumber}
                   </p>
                 </div>
               </div>
@@ -499,7 +499,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Email ID</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.emailId}
+                    {studentData?.emailId}
                   </p>
                 </div>
               </div>
@@ -508,7 +508,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Alternate Email ID</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.alternateEmailId}
+                    {studentData?.alternateEmailId}
                   </p>
                 </div>
               </div>
@@ -517,7 +517,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Permanent Address</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.permanentAddress}
+                    {studentData?.permanentAddress}
                   </p>
                 </div>
               </div>
@@ -526,7 +526,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Present Address</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.presentAddress}
+                    {studentData?.presentAddress}
                   </p>
                 </div>
               </div>
@@ -546,7 +546,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Aadhar Number</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.aadharNumber}
+                    {studentData?.aadharNumber}
                   </p>
                 </div>
               </div>
@@ -555,7 +555,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Passport Number</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.passportNumber}
+                    {studentData?.passportNumber}
                   </p>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">PAN Number</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.panNumber}
+                    {studentData?.panNumber}
                   </p>
                 </div>
               </div>
@@ -573,7 +573,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">ABC ID</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.abcId}
+                    {studentData?.abcId}
                   </p>
                 </div>
               </div>
@@ -582,7 +582,7 @@ export default function Profile() {
                 <div>
                   <p className="text-sm text-gray-500">Voter Card</p>
                   <p className="font-medium text-gray-800">
-                    {studentData.voterCard}
+                    {studentData?.voterCard}
                   </p>
                 </div>
               </div>
