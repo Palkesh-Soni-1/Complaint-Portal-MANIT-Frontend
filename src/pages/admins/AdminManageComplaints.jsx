@@ -73,7 +73,7 @@ const AdminManageComplaints = () => {
   useEffect(()=>{
     const fetchComplaints = async () => {
       try {
-        const response = await fetch('http://localhost:3000/complaint/get/all');
+        const response = await fetch(`${import.meta.env.VITE_SITE}/complaint/get/all`);
         if (!response.ok) {
           throw new Error('Failed to fetch complaints');
         }

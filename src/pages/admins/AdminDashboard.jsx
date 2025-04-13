@@ -160,7 +160,7 @@ function AdminDashboard() {
                 <div className="mt-1">
                   <p className="text-sm text-gray-600 truncate">{complaint.description}</p>
                   <div className="flex items-center mt-1">
-                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">{complaint.complaintSubType}</span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">{complaint.complaintType}</span>
                     {complaint.hostelNumber && 
                       <span className="text-xs px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full ml-2">
                         {complaint.hostelNumber} - Room {complaint.roomNumber}
