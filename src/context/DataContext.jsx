@@ -28,9 +28,9 @@ export const DataProvider = ({ children }) => {
         information.advancedInfo=data;
         data = await studentResult({uid:rollNo})
         information.resultData=data;
-        console.log("information:",information)
+        // console.log("information:",information)
 
-        // setInfo(infoConverter(information))
+        setInfo(infoConverter(information))
       } catch (err) {
         console.log("Failed to fetch dur to: ",err);
       }
