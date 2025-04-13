@@ -33,91 +33,9 @@ export default function Profile() {
 
   const {auth} = useAuth();
   const studentData=auth.userData;
-  // const studentData = {
-  //   // Basic Info
-  //   name: "Alex Johnson",
-  //   fullName: "Alexander David Johnson",
-  //   department: "Computer Science",
-  //   studentId: "STU2023456",
-  //   semester: "Spring 2025",
-  //   year: "3rd Year",
-  //   dateOfBirth: "15 June 2000",
-  //   maritalStatus: "Single",
-  //   nationality: "American",
-  //   bloodGroup: "O+",
-  //   motherTongue: "English",
-  //   caste: "N/A",
-  //   gender: "Male",
-
-  //   // Residence
-  //   hostel: "West Wing Dormitory",
-  //   roomNo: "203-B",
-
-  //   // Documents
-  //   aadharNumber: "XXXX-XXXX-1234",
-  //   passportNumber: "A12345678",
-  //   panNumber: "ABCDE1234F",
-  //   abcId: "ABC123456789",
-  //   voterCard: "VTR987654321",
-
-  //   // Family Details
-  //   fatherName: "David Johnson",
-  //   fatherProfession: "Software Engineer",
-  //   motherName: "Sarah Williams",
-  //   motherProfession: "University Professor",
-  //   parentsAddress: "456 Maple Avenue, Springfield, IL",
-  //   parentsPhone: "+1 (555) 987-6543",
-  //   parentsEmail: "david.johnson@email.com",
-  //   guardianName: "Emma Johnson",
-  //   relationshipWithGuardian: "Aunt",
-  //   guardianAddress: "789 Oak Street, Springfield, IL",
-  //   guardianPhone: "+1 (555) 456-7890",
-  //   guardianEmail: "emma.johnson@email.com",
-
-  //   // Contact Info
-  //   phoneNumber: "+1 (555) 123-4567",
-  //   alternatePhoneNumber: "+1 (555) 234-5678",
-  //   emailId: "alex.johnson@university.edu",
-  //   alternateEmailId: "alexj2000@email.com",
-
-  //   // Addresses
-  //   permanentAddress: "123 Pine Street, Springfield, IL",
-  //   presentAddress: "123 Campus Drive, University Heights",
-
-  //   // Academic Info
-  //   enrollmentDate: "September 2022",
-  //   gpa: "3.8/4.0",
-  //   academicAdvisor: "Dr. Robert Chen",
-  // };
-
-  // Wave animation
-  const waveVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-      },
-    },
-  };
-
-  const wavePath = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: {
-      pathLength: 1,
-      opacity: 1,
-      transition: {
-        duration: 2,
-        ease: "easeInOut",
-        repeat: Infinity,
-        repeatType: "reverse",
-      },
-    },
-  };
 
   return (
-    <div className="max-w-4xl my-6 rounded-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-blue-300 min-h-screen">
-      {/* Header with wave animation */}
+    <div className="max-w-4xl my-4 rounded-lg mx-auto px-1 py-8  min-h-screen">
       <div className="overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-xl mb-8">
 
         <div className="p-8 flex flex-col md:flex-row items-center z-10">

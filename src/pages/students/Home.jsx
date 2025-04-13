@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Calendar,
   Filter,
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -17,6 +18,7 @@ function Home() {
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all");
@@ -51,7 +53,6 @@ function Home() {
     }
   }, [auth]);
 
-  // Apply filters whenever filter states change
   useEffect(() => {
     applyFilters();
   }, [statusFilter, dateFilter, searchTerm, complaints]);
@@ -59,12 +60,10 @@ function Home() {
   const applyFilters = () => {
     let result = [...complaints];
 
-    // Apply status filter
     if (statusFilter !== "all") {
       result = result.filter((complaint) => complaint.status === statusFilter);
     }
 
-    // Apply date filter
     if (dateFilter.startDate && dateFilter.endDate) {
       const startDate = new Date(dateFilter.startDate);
       const endDate = new Date(dateFilter.endDate);
@@ -75,7 +74,6 @@ function Home() {
       });
     }
 
-    // Apply search term
     if (searchTerm) {
       result = result.filter(
         (complaint) =>
@@ -122,28 +120,28 @@ function Home() {
     switch (status) {
       case "resolved":
         return (
-          <div className="bg-green-200 text-green-800 px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center gap-1">
+          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-6">
             <Check size={14} />
-            Resolved
+            <span className="xs:inline">Resolved</span>
           </div>
         );
       case "open":
         return (
-          <div className="bg-red-500 text-white px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center gap-1">
+          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-6">
             <AlertCircle size={14} />
-            Open
+            <span className="xs:inline">Open</span>
           </div>
         );
       case "processing":
         return (
-          <div className="bg-yellow-300 text-yellow-800 px-6 py-1 rounded-full w-min whitespace-nowrap flex items-center gap-1">
+          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-6">
             <Clock size={14} />
-            Processing
+            <span className="xs:inline">Processing</span>
           </div>
         );
       default:
         return (
-          <div className="bg-gray-200 text-gray-800 px-6 py-1 rounded-full w-min whitespace-nowrap">
+          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-6">
             {status}
           </div>
         );
@@ -151,7 +149,6 @@ function Home() {
   };
 
   const downloadAsCSV = () => {
-    // Create CSV content
     const headers = ["Complaint No.", "Date", "Type", "Status"];
     const csvContent = [
       headers.join(","),
@@ -165,7 +162,6 @@ function Home() {
       ),
     ].join("\n");
 
-    // Create download link
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -180,19 +176,22 @@ function Home() {
     document.body.removeChild(link);
   };
 
+  const toggleFilters = () => {
+    setIsFilterOpen(!isFilterOpen);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto my-10 p-4 font-sans min-h-screen bg-blue-300 rounded-xl">
+    <div className="max-w-4xl mx-auto my-4 md:my-10 px-1 font-sans min-h-screen rounded-lg md:rounded-xl">
       <div className="overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-4 border-b border-blue-300 flex justify-between items-center">
-          <h1 className="text-lg font-bold text-blue-100">
+
+        <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-3 md:p-4 border-b border-blue-300 flex justify-between items-center">
+          <h1 className="text-base md:text-lg font-bold text-blue-100">
             Complaints ({filteredComplaints.length})
           </h1>
         </div>
 
-        {/* Search bar */}
-        <div className="py-4 flex justify-between bg-transparent">
-          <div className="relative w-2/3">
+        <div className="py-3 md:py-4 flex max-lg:flex-col flex-row max-lg:gap-2 gap-0 sm:justify-between bg-transparent">
+          <div className="relative w-full lg:w-2/3">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search size={18} className="text-gray-400" />
             </div>
@@ -204,141 +203,191 @@ function Home() {
               onChange={handleSearchChange}
             />
           </div>
-          <button
-            className="flex items-center gap-2 text-sm bg-white border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-50"
-            onClick={downloadAsCSV}
-          >
-            <Download size={18} />
-            <p className="max-sm:hidden">Download as CSV</p>
-          </button>
+          <div className="flex space-x-2">
+            <button
+              className="flex items-center justify-center gap-2 text-sm bg-white border border-gray-300 rounded-md px-3 py-2 hover:bg-gray-50"
+              onClick={toggleFilters}
+            >
+              <Filter size={16} />
+              <span className="hidden sm:inline">Filters</span>
+              <ChevronRight
+                size={16}
+                className={`transform transition-transform ${
+                  isFilterOpen ? "rotate-90" : "rotate-0"
+                }`}
+              />
+            </button>
+            <button
+              className="flex items-center justify-center gap-2 text-sm bg-white border border-gray-300 rounded-md px-3 py-2 hover:bg-gray-50"
+              onClick={downloadAsCSV}
+            >
+              <Download size={16} />
+              <span className="hidden sm:inline">Export CSV</span>
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg overflow-hidden">
-          {/* Filters */}
-          <div className="p-4 border-b border-blue-100">
-            <div className="flex flex-wrap gap-4 items-center justify-between">
-              <h2 className="text-sm font-medium flex items-center gap-2">
-                <Filter size={16} className="text-blue-500" />
-                Filter Your Search
-              </h2>
+        <div className="bg-white rounded-lg overflow-hidden shadow-md">
 
-              <div className="flex flex-wrap gap-4 items-center">
-                {/* Status Filter */}
-                <div className="flex items-center gap-2">
-                  <label htmlFor="status" className="text-sm text-gray-600">
-                    Status:
-                  </label>
-                  <select
-                    id="status"
-                    value={statusFilter}
-                    onChange={handleStatusFilterChange}
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="open">Open</option>
-                    <option value="processing">Processing</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
+          <div
+            className={`border-b border-blue-100 transition-all duration-300 overflow-hidden ${
+              isFilterOpen ? "max-h-96" : "max-h-0"
+            }`}
+          >
+            <div className="p-4">
+              <div className="flex flex-col gap-4">
+                <h2 className="text-sm font-medium flex items-center gap-2">
+                  <Filter size={16} className="text-blue-500" />
+                  Filter Your Search
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="status" className="text-sm text-gray-600">
+                      Status:
+                    </label>
+                    <select
+                      id="status"
+                      value={statusFilter}
+                      onChange={handleStatusFilterChange}
+                      className="border border-gray-300 rounded-md px-2 py-2 text-sm"
+                    >
+                      <option value="all">All</option>
+                      <option value="open">Open</option>
+                      <option value="processing">Processing</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                  </div>
+
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-gray-600 flex items-center gap-1">
+                      <Calendar size={14} />
+                      From:
+                    </label>
+                    <input
+                      type="date"
+                      value={dateFilter.startDate}
+                      onChange={(e) =>
+                        handleDateFilterChange("startDate", e.target.value)
+                      }
+                      className="border border-gray-300 rounded-md px-2 py-2 text-sm"
+                    />
+                  </div>
+
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-gray-600">To:</label>
+                    <input
+                      type="date"
+                      value={dateFilter.endDate}
+                      onChange={(e) =>
+                        handleDateFilterChange("endDate", e.target.value)
+                      }
+                      className="border border-gray-300 rounded-md px-2 py-2 text-sm"
+                    />
+                  </div>
                 </div>
 
-                {/* Date Range Filter */}
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 flex items-center gap-1">
-                    <Calendar size={14} />
-                    From:
-                  </label>
-                  <input
-                    type="date"
-                    value={dateFilter.startDate}
-                    onChange={(e) =>
-                      handleDateFilterChange("startDate", e.target.value)
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">To:</label>
-                  <input
-                    type="date"
-                    value={dateFilter.endDate}
-                    onChange={(e) =>
-                      handleDateFilterChange("endDate", e.target.value)
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-                  />
-                </div>
-
-                {/* Clear Filters Button */}
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline self-start"
                 >
                   Clear Filters
                 </button>
               </div>
+
+              {(statusFilter !== "all" ||
+                dateFilter.startDate ||
+                dateFilter.endDate) && (
+                <div className="mt-3 flex items-center flex-wrap gap-2">
+                  <span className="text-xs text-gray-500">Active filters:</span>
+
+                  {statusFilter !== "all" && (
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      Status: {statusFilter}
+                    </span>
+                  )}
+
+                  {dateFilter.startDate && dateFilter.endDate && (
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      Date:{" "}
+                      {new Date(dateFilter.startDate).toLocaleDateString()} -{" "}
+                      {new Date(dateFilter.endDate).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div className="hidden md:grid md:grid-cols-4 border-t border-b border-blue-300 bg-white text-sm">
+              <div className="font-medium p-3 md:p-4">Complaint No.</div>
+              <div className="font-medium p-3 md:p-4">Date</div>
+              <div className="font-medium p-3 md:p-4">Type</div>
+              <div className="font-medium p-3 md:p-4">Status</div>
             </div>
 
-            {/* Active Filters Display */}
-            {(statusFilter !== "all" ||
-              dateFilter.startDate ||
-              dateFilter.endDate) && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="text-xs text-gray-500">Active filters:</span>
+            {loading ? (
+              <div className="text-center py-8 text-gray-500">
+                Loading complaints...
+              </div>
+            ) : filteredComplaints.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No complaints match your filter criteria
+              </div>
+            ) : (
+              <div>
+                <div className="sm:hidden">
+                  {filteredComplaints.map((complaint, index) => (
+                    <div
+                      key={index}
+                      className="border-b border-blue-100 p-3 hover:bg-blue-50"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="text-blue-600 font-medium">
+                          {complaint.complaintNumber}
+                        </div>
+                        <div>{getStatusBadge(complaint.status)}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="text-gray-600">Date:</div>
+                        <div>{complaint.dateReported}</div>
+                        <div className="text-gray-600">Type:</div>
+                        <div className="text-blue-800 font-medium">
+                          {complaint.complaintType}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-                {statusFilter !== "all" && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    Status: {statusFilter}
-                  </span>
-                )}
-
-                {dateFilter.startDate && dateFilter.endDate && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    Date: {new Date(dateFilter.startDate).toLocaleDateString()}{" "}
-                    - {new Date(dateFilter.endDate).toLocaleDateString()}
-                  </span>
-                )}
+                <div className="hidden sm:block">
+                  {filteredComplaints.map((complaint, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-4 border-b border-blue-300 text-sm hover:bg-blue-50"
+                    >
+                      <div className="p-3 sm:p-4 text-blue-600">
+                        {complaint.complaintNumber}
+                      </div>
+                      <div className="p-3 sm:p-4 text-gray-600">
+                        {complaint.dateReported}
+                      </div>
+                      <div className="p-3 sm:p-4 text-blue-800 font-medium">
+                        {complaint.complaintType}
+                      </div>
+                      <div className="p-3 sm:p-4">
+                        {getStatusBadge(complaint.status)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-
-          {/* Table Headers */}
-          <div className="grid grid-cols-4 border-t border-b border-blue-300 bg-white text-sm">
-            <div className="font-medium p-4">Complaint No.</div>
-            <div className="font-medium p-4">Date of Complaint</div>
-            <div className="font-medium p-4">Type of Complaint</div>
-            <div className="font-medium p-4">Status</div>
-          </div>
-
-          {/* Loading State */}
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">
-              Loading complaints...
-            </div>
-          ) : filteredComplaints.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No complaints match your filter criteria
-            </div>
-          ) : (
-            /* Table Rows */
-            filteredComplaints.map((complaint, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-4 border-b border-blue-300 text-sm hover:bg-blue-50"
-              >
-                <div className="p-4 text-blue-600">
-                  {complaint.complaintNumber}
-                </div>
-                <div className="p-4 text-gray-600">
-                  {complaint.dateReported}
-                </div>
-                <div className="p-4 text-blue-800 font-medium">
-                  {complaint.complaintType}
-                </div>
-                <div className="p-4">{getStatusBadge(complaint.status)}</div>
-              </div>
-            ))
-          )}
         </div>
       </div>
     </div>
