@@ -1,6 +1,6 @@
 async function studentLogin({ username, password }) {
   try {
-    const response = await fetch("http://erpapi.manit.ac.in/api/login", {
+    const response = await fetch("https://erpapi.manit.ac.in/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
