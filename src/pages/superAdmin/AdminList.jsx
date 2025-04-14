@@ -28,11 +28,14 @@ function AdminList() {
         setError(null)
         const token = localStorage.getItem("token");
 
-        const response = await fetch("http://localhost:3000/superadmin/admins", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_SITE}/superadmin/admins`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -104,10 +107,12 @@ function AdminList() {
     let url, method;
 
     if (isEditing) {
-      url = `http://localhost:3000/superadmin/admins/${currentAdmin._id}`;
+      url = `${import.meta.env.VITE_SITE}/superadmin/admins/${
+        currentAdmin._id
+      }`;
       method = "PUT";
     } else {
-      url = "http://localhost:3000/superadmin/admins";
+      url = `${import.meta.env.VITE_SITE}/superadmin/admins`;
       method = "POST";
     }
 
@@ -164,12 +169,15 @@ function AdminList() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:3000/superadmin/admins/${adminId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SITE}/superadmin/admins/${adminId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}`);
@@ -189,16 +197,19 @@ function AdminList() {
   const handleToggleActive = async (admin) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:3000/superadmin/admins/${admin._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          isActive: !admin.isActive,
-        }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SITE}/superadmin/admins/${admin._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            isActive: !admin.isActive,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}`);

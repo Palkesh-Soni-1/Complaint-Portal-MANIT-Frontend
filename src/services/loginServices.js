@@ -1,6 +1,6 @@
 export async function loginAdmin({ username, password }) {
   try {
-    const response = await fetch("http://localhost:3000/admin/login", {
+    const response = await fetch(`${import.meta.env.VITE_SITE}/admin/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -23,7 +23,7 @@ export async function loginAdmin({ username, password }) {
 }
 export async function loginSuperAdmin({ username, password }) {
   try {
-    const response = await fetch("http://localhost:3000/superadmin/login", {
+    const response = await fetch(`${import.meta.env.VITE_SITE}/superadmin/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
