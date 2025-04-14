@@ -93,7 +93,9 @@ const AdminManageComplaints = () => {
   return (
     <div className="max-w-[1100px] mx-auto my-5 min-h-[70vh] px-2">
       {isLoading ? (
-        <Loader />
+        <div className="min-h-[70vh] flex justify-center items-center">
+            <Loader />
+        </div>
       ) : (
         <div>
           {activeView === "list" && (

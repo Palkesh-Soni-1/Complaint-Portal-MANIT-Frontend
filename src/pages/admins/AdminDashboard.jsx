@@ -59,7 +59,7 @@ function AdminDashboard() {
   return (
     <div className="max-w-[1100px] mx-auto min-h-[70vh] py-5 px-2">
       {isLoading ? (
-        <div>
+        <div className="min-h-[70vh] flex justify-center items-center">
           <Loader />
         </div>
       ) : (
@@ -91,9 +91,7 @@ function AdminDashboard() {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-600">
-                    Total
-                  </h3>
+                  <h3 className="text-lg font-medium text-gray-600">Total</h3>
                   <p className="text-2xl font-bold text-gray-800">
                     {totalComplaints}
                   </p>
