@@ -28,7 +28,7 @@ const Login = () => {
                 Welcome Back
               </h2>
               <p className="text-center">
-                Please Login <br /> using your Student ID and Password
+                Please Login <br /> using your ID and Password
               </p>
             </div>
           </div>

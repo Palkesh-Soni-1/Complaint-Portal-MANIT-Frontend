@@ -7,6 +7,8 @@ import Profile from "./pages/students/Profile";
 import Complaint from "./pages/students/Complaint";
 import AdminDashboard from "./pages/admins/AdminDashboard";
 import AdminManageComplaints from "./pages/admins/AdminManageComplaints";
+import SuperAdminProfile from "./pages/superAdmin/SuperAdminProfile";
+import AdminList from "./pages/superAdmin/AdminList";
 import Loader from "./components/Loader";
 import { useAuth } from "./context/AuthContext";
 import { useData } from "./context/DataContext";
@@ -60,9 +62,26 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* SuperAdmin Routes */}
+        <Route
+          path="/superadmin/admins"
+          element={
+            <ProtectedRoute role="superadmin">
+              <AdminList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superadmin/profile"
+          element={
+            <ProtectedRoute role="superadmin">
+              <SuperAdminProfile />
+            </ProtectedRoute>
+          }
+        />
       </Route>
-      <Route path="/*"
-      element={<CatchAllRoutes/>}></Route>
+      <Route path="/*" element={<CatchAllRoutes />}></Route>
     </Routes>
   );
 };
@@ -91,6 +110,8 @@ const RedirectBasedOnRole = () => {
     return <Navigate to="/student/home" replace />;
   } else if (auth?.role === "admin") {
     return <Navigate to="/admin/dashboard" replace />;
+  } else if (auth?.role === "superadmin") {
+    return <Navigate to="/superadmin/admins" replace />;
   } else {
     logout();
     return <Login />;

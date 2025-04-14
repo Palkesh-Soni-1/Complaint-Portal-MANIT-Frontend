@@ -16,12 +16,10 @@ async function studentLogin({ username, password }) {
     }
 
     const data = await response.json();
-    // console.log("Login successful:", data);
     localStorage.setItem("token",data.token);
     return data;
   } catch (err) {
     console.error("Login error:", err);
-    // Handle error scenarios, such as showing an error message to the user
   }
 }
 

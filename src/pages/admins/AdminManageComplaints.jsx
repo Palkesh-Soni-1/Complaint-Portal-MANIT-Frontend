@@ -53,7 +53,7 @@ const AdminManageComplaints = () => {
           complaint._id === id ? { ...complaint, status: newStatus } : complaint
         )
       );
-      alert(`Complaint status updated to ${newStatus}`);
+      // alert(`Complaint status updated to ${newStatus}`);
     } catch (error) {
       console.error("Error updating complaint status:", error);
       alert("Failed to update complaint status");

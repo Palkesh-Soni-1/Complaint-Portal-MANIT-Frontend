@@ -161,6 +161,46 @@ const Navbar = () => {
                   <p className="max-s350:hidden">Logout</p>
                 </div>
               </div>
+            ) : 
+            auth?.role === "superadmin" ? (
+              <div className="mb-3 rounded-lg px-5 max-sm:px-2 py-2 flex justify-between border-2 border-white">
+                <div className="flex gap-5 max-sm:gap-2">
+                  <NavLink
+                    to="/superadmin/admins"
+                    className={({ isActive }) =>
+                      `${
+                        isActive
+                          ? "border-b-2 border-white"
+                          : "border-b-2 border-transparent"
+                      }`
+                    }
+                  >
+                    Admins
+                  </NavLink>
+                  {/* <NavLink
+                    to="/superadmin/profile"
+                    className={({ isActive }) =>
+                      `${
+                        isActive
+                          ? "border-b-2 border-white"
+                          : "border-b-2 border-transparent"
+                      }`
+                    }
+                  >
+                    Profile
+                  </NavLink> */}
+                </div>
+                <div
+                  className="cursor-pointer flex justify-center items-center"
+                  onClick={logout}
+                >
+                  <FontAwesomeIcon
+                    icon={faRightFromBracket}
+                    className="s350:pr-1"
+                  />
+                  <p className="max-s350:hidden">Logout</p>
+                </div>
+              </div>
             ) : null}
           </div>
         </div>
