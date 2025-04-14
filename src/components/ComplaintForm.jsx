@@ -151,8 +151,10 @@ const ComplaintForm = () => {
     }
   };
 
+
+  
   return (
-    <div className="p-8 bg-transparent max-w-[1200px] mx-auto">
+    <div className="p-8 bg-transparent max-w-[1100px] mx-auto">
       {isLoading ? (
         <Loader />
       ) : (

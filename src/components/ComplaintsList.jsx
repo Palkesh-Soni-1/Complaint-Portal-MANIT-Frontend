@@ -1,4 +1,3 @@
-// src/components/ComplaintsList.jsx
 import { useState } from "react";
 import {
   Search,
@@ -112,6 +111,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     }));
   };
 
+  
   return (
     <div className="max-w-4xl mx-auto my-4 md:my-6">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 md:p-4 rounded-t-lg">

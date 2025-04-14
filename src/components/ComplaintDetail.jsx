@@ -1,5 +1,5 @@
-// src/components/ComplaintDetail.jsx
 function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
+  
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
