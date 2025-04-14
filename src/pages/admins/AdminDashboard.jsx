@@ -93,7 +93,7 @@ function AdminDashboard() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-600">
-                    Total Complaints
+                    Total
                   </h3>
                   <p className="text-2xl font-bold text-gray-800">
                     {totalComplaints}
