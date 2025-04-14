@@ -48,7 +48,6 @@ function AdminDashboard() {
   ).length;
 
   const recentComplaints = [...complaints]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
   const pieData = [
