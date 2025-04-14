@@ -65,9 +65,11 @@ function AdminDashboard() {
         </div>
       ) : (
         <div>
-          <h2 className="text-2xl font-bold text-center text-gray-300 mb-6">
-            Admin Dashboard
-          </h2>
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 my-4 md:p-4 rounded-t-lg">
+            <h2 className="text-lg md:text-xl text-center md:text-left font-bold text-gray-100">
+              Admin Dashboard
+            </h2>
+          </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

@@ -113,7 +113,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
 
   
   return (
-    <div className="max-w-4xl mx-auto my-4 md:my-6">
+    <div className="max-w-[1100px] mx-auto my-4 md:my-6">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 md:p-4 rounded-t-lg">
         <h2 className="text-lg md:text-xl text-center md:text-left font-bold text-gray-100">
           All Complaints
