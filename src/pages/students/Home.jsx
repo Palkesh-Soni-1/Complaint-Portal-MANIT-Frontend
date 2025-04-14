@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useState, useEffect } from "react";
 import {
   Download,
@@ -10,6 +9,8 @@ import {
   Filter,
   ChevronRight,
 } from "lucide-react";
+import Loader from "../../components/Loader";
+
 import { useData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
 
@@ -183,7 +184,7 @@ function Home() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-4 md:my-10 px-1 font-sans min-h-screen rounded-lg md:rounded-xl">
+    <div className="max-w-4xl mx-auto my-4 md:my-10 px-2 font-sans min-h-screen rounded-lg md:rounded-xl">
       <div className="overflow-hidden">
 
         <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-3 md:p-4 border-b border-blue-300 flex justify-between items-center">
@@ -334,7 +335,7 @@ function Home() {
 
             {loading ? (
               <div className="text-center py-8 text-gray-500">
-                Loading complaints...
+                <Loader/>
               </div>
             ) : filteredComplaints.length === 0 ? (
               <div className="text-center py-8 text-gray-500">

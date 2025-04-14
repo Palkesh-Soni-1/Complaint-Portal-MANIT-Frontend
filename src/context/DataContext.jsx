@@ -11,12 +11,13 @@ import infoConverter from "../services/studentInfoConversion";
 
 export const DataProvider = ({ children }) => {
   
-  const {auth} =useAuth();
-
+  const {auth,logout} =useAuth();
   const [info,setInfo] = useState(null);
+  const [isLoadingData,setIsLoadingData] =useState(false);
 
   useEffect(()=>{
     const fun = async()=>{
+      setIsLoadingData(true);
       const rollNo = auth?.userData?.userInfo?.studentInfo?.[0]?.roll_no;
       if (!rollNo) return;
       try {
@@ -33,16 +34,20 @@ export const DataProvider = ({ children }) => {
         setInfo(infoConverter(information))
       } catch (err) {
         console.log("Failed to fetch dur to: ",err);
+        logout();
+      }
+      finally{
+        setIsLoadingData(false);
       }
     }
-    if(auth){
+    if(auth && auth?.role=="student"){
       fun();
     }
   },[auth])
 
   return (
     <DataContext.Provider
-      value={{ info }}
+      value={{ info,isLoadingData }}
     >
       {children}
     </DataContext.Provider>

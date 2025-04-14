@@ -88,7 +88,7 @@ const AdminManageComplaints = () => {
   },[]);
 
   return (
-    <div className="max-w-[1100px] mx-auto my-5 min-h-[50vh]">
+    <div className="max-w-[1100px] mx-auto my-5 min-h-[50vh] px-2">
       {activeView === "list" && (
         <ComplaintsList
           complaints={complaints}

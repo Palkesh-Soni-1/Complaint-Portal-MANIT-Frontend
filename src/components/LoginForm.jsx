@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-
+import Loader from "./Loader";
 const LoginForm = () => {
   const { login,isLoading } = useAuth();
   const [username, setUsername] = useState("");
@@ -30,7 +30,10 @@ const LoginForm = () => {
 
   return (
     <div className="flex flex-col p-5 bg-white rounded-lg shadow-lg text-violet-500">
-      <h1 className="my-6 text-3xl font-semibold text-center">Login</h1>
+      {
+        isLoading? <Loader/>:
+        <div>
+          <h1 className="my-6 text-3xl font-semibold text-center">Login</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -55,7 +58,7 @@ const LoginForm = () => {
           type="submit"
           className="w-full py-2 mt-4 text-white bg-blue-500 rounded-sm hover:bg-blue-600 font-semibold transition-all"
         >
-          {isLoading?"LoggingIn...":"LogIn"}
+          Login
         </button>
         {error ? (
           <div className="text-red-500 text-center mt-4">{error}</div>
@@ -63,6 +66,8 @@ const LoginForm = () => {
           <div className="text-red-500 text-center mt-4"></div>
         )}
       </form>
+        </div>
+      }
     </div>
   );
 };

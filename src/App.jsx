@@ -7,7 +7,9 @@ import Profile from "./pages/students/Profile";
 import Complaint from "./pages/students/Complaint";
 import AdminDashboard from "./pages/admins/AdminDashboard";
 import AdminManageComplaints from "./pages/admins/AdminManageComplaints";
+import Loader from "./components/Loader";
 import { useAuth } from "./context/AuthContext";
+import { useData } from "./context/DataContext";
 
 const App = () => {
   return (
@@ -76,10 +78,11 @@ const CatchAllRoutes = () => {
 
 const RedirectBasedOnRole = () => {
   const { auth, logout, isLoading } = useAuth();
-  if (isLoading) {
+  const {isLoadingData} =useData();
+  if (isLoading || isLoadingData) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center text-3xl bg-transparent font-bold text-gray-700">
-        <div>Loading...</div>
+        <Loader />
       </div>
     );
   }
@@ -96,10 +99,11 @@ const RedirectBasedOnRole = () => {
 
 const ProtectedRoute = ({ role, children }) => {
   const { auth,logout, isLoading } = useAuth();
-  if (isLoading) {
+  const {isLoadingData}=useData();
+  if (isLoading||isLoadingData) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center text-3xl bg-transparent font-bold text-gray-700">
-        <div>Loading...</div>
+        <Loader/>
       </div>
     );
   }

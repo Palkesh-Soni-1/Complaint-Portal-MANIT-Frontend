@@ -34,7 +34,7 @@ export default function Profile() {
   const studentData=info;
 
   return (
-    <div className="max-w-4xl my-4 rounded-lg mx-auto px-1 py-8  min-h-screen">
+    <div className="max-w-4xl my-4 rounded-lg mx-auto px-2 py-8  min-h-screen">
       <div className="overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-xl mb-8">
 
         <div className="p-8 flex flex-col md:flex-row items-center z-10">

@@ -23,7 +23,7 @@ function AdminDashboard() {
     fetchComplaints();
   },[]);
 
-  console.log(complaints)
+  // console.log(complaints)
   const totalComplaints = complaints.length;
   const openComplaints = complaints.filter(c => c.status === 'open').length;
   const processingComplaints = complaints.filter(c => c.status === 'processing').length;
@@ -40,7 +40,7 @@ function AdminDashboard() {
   ];
   
   return (
-    <div className='max-w-[1100px] mx-auto py-5'>
+    <div className='max-w-[1100px] mx-auto py-5 px-2'>
       <h2 className="text-2xl font-bold text-center text-gray-300 mb-6">Admin Dashboard</h2>
       
       {/* Stats Cards */}
@@ -106,7 +106,7 @@ function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Chart */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-700 mb-4">Complaint Status Overview</h3>
+          <h3 className="sm:text-lg font-medium text-gray-700 mb-4">Complaint Status Overview</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
