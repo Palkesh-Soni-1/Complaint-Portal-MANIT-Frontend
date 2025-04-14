@@ -59,7 +59,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
 
         <div className="border-t border-gray-200">
           <dl>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Student Name
               </dt>
@@ -67,7 +67,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.studentName}
               </dd>
             </div>
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Student ID
               </dt>
@@ -75,7 +75,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.studentId}
               </dd>
             </div>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Hostel & Room
               </dt>
@@ -83,7 +83,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 Hostel {complaint.hostelNumber}, Room {complaint.roomNumber}
               </dd>
             </div>
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Complaint Type
               </dt>
@@ -91,7 +91,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.complaintType}
               </dd>
             </div>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Complaint Subtype
               </dt>
@@ -99,7 +99,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.complaintSubType}
               </dd>
             </div>
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Description
               </dt>
@@ -108,7 +108,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
               </dd>
             </div>
             {complaint.attachments && complaint.attachments.length > 0 && (
-              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
                 <dt className="text-xs sm:text-sm font-medium text-gray-500">
                   Attachments
                 </dt>
@@ -147,7 +147,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 </dd>
               </div>
             )}
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Created At
               </dt>
