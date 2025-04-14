@@ -58,7 +58,7 @@ function AdminDashboard() {
   ];
 
   return (
-    <div className="max-w-[1100px] mx-auto min-h-[70vh] flex justify-center items-center py-5 px-2">
+    <div className="max-w-[1100px] mx-auto min-h-[70vh] py-5 px-2">
       {isLoading ? (
         <div>
           <Loader />
@@ -189,9 +189,9 @@ function AdminDashboard() {
           </div>
 
           {/* Charts and Recent Complaints */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Chart */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-6 max-sm:hidden">
               <h3 className="sm:text-lg font-medium text-gray-700 mb-4">
                 Complaint Status Overview
               </h3>
