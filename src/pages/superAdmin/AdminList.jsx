@@ -1,15 +1,27 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
-
+import {useAuth} from "../../context/AuthContext"
 function AdminList() {
+
+  const {logout}= useAuth();
+
   const [admins, setAdmins] = useState([]);
+  const [filteredAdmins, setFilteredAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reload,setReload] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
+
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterDepartment, setFilterDepartment] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const [departments, setDepartments] = useState([]);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -25,7 +37,7 @@ function AdminList() {
     const fetchAdmins = async () => {
       try {
         setLoading(true);
-        setError(null)
+        setError(null);
         const token = localStorage.getItem("token");
 
         const response = await fetch(
@@ -38,11 +50,21 @@ function AdminList() {
         );
 
         if (!response.ok) {
+          if(response.status===401){
+            logout();
+          }
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
         setAdmins(data);
+        setFilteredAdmins(data);
+
+        const uniqueDepartments = [
+          ...new Set(data.map((admin) => admin.department)),
+        ];
+        setDepartments(uniqueDepartments);
+
         setError(null);
       } catch (err) {
         setError(`Failed to fetch admins: ${err.message}`);
@@ -53,9 +75,35 @@ function AdminList() {
     };
 
     fetchAdmins();
-  }, []);
+  }, [reload]);
 
-  // Handle form input changes
+  useEffect(() => {
+    let results = admins;
+    if (searchTerm) {
+      const lowercasedSearch = searchTerm.toLowerCase();
+      results = results.filter(
+        (admin) =>
+          admin.fullName.toLowerCase().includes(lowercasedSearch) ||
+          admin.username.toLowerCase().includes(lowercasedSearch) ||
+          admin.email.toLowerCase().includes(lowercasedSearch) ||
+          admin.role.toLowerCase().includes(lowercasedSearch)
+      );
+    }
+
+    if (filterStatus !== "all") {
+      const isActive = filterStatus === "active";
+      results = results.filter((admin) => admin.isActive === isActive);
+    }
+
+    if (filterDepartment !== "all") {
+      results = results.filter(
+        (admin) => admin.department === filterDepartment
+      );
+    }
+
+    setFilteredAdmins(results);
+  }, [searchTerm, filterStatus, filterDepartment, admins, reload]);
+
   const handleChange = (e) => {
     setError(null);
     const { name, value } = e.target;
@@ -65,9 +113,26 @@ function AdminList() {
     }));
   };
 
-  // Open the form for creating a new admin
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setFilterStatus("all");
+    setFilterDepartment("all");
+  };
+
   const handleAddNew = () => {
-    setError(null)
+    setError(null);
     setIsEditing(false);
     setCurrentAdmin(null);
     setFormData({
@@ -82,7 +147,6 @@ function AdminList() {
     setShowForm(true);
   };
 
-  // Open the form for editing an existing admin
   const handleEdit = (admin) => {
     setError(null);
     setIsEditing(true);
@@ -99,10 +163,9 @@ function AdminList() {
     setShowForm(true);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null)
+    setError(null);
     const token = localStorage.getItem("token");
     let url, method;
 
@@ -127,6 +190,9 @@ function AdminList() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+        }
         const errorData = await response.json();
         throw new Error(errorData.message || `Error ${response.status}`);
       }
@@ -142,6 +208,14 @@ function AdminList() {
         );
       } else {
         setAdmins((prevAdmins) => [data.admin, ...prevAdmins]);
+        // To be removed (Temporary)
+        setReload(!reload);
+        if (
+          data.admin.department &&
+          !departments.includes(data.admin.department)
+        ) {
+          setDepartments([...departments, data.admin.department]);
+        }
       }
 
       // Close the form
@@ -180,6 +254,9 @@ function AdminList() {
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+        }
         throw new Error(`Error ${response.status}`);
       }
 
@@ -212,6 +289,9 @@ function AdminList() {
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+        }
         throw new Error(`Error ${response.status}`);
       }
 
@@ -251,22 +331,46 @@ function AdminList() {
     },
   };
 
+  const filterVariants = {
+    hidden: { height: 0, opacity: 0 },
+    visible: {
+      height: "auto",
+      opacity: 1,
+      transition: {
+        height: { type: "spring", stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+      },
+    },
+    exit: {
+      height: 0,
+      opacity: 0,
+      transition: {
+        height: { type: "spring", stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+      },
+    },
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader/>
+        <Loader />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-[80vh]">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-200">Admin Management</h1>
+    <div className="max-w-[1200px] mx-auto sm:px-4 p-2 py-8 min-h-[80vh]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div className="md:p-4 rounded-t-lg max-sm:w-full">
+          <h2 className="text-lg md:text-xl text-center md:text-left font-bold text-gray-100">
+            Admin Management
+          </h2>
+        </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-md flex items-center"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-md flex items-center w-full sm:w-auto justify-center"
           onClick={handleAddNew}
         >
           <svg
@@ -285,6 +389,203 @@ function AdminList() {
         </motion.button>
       </div>
 
+      {/* Search and Filter Section */}
+      <div className="mb-6 bg-gray-800 rounded-lg p-4 shadow-md">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-1/3">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearch}
+              placeholder="Search by name, email, role..."
+              className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 pl-10"
+            />
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Filter Toggles */}
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleFilters}
+              className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-md shadow-sm sm:hidden w-full justify-center"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                ></path>
+              </svg>
+              {showFilters ? "Hide" : "Show"}
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={resetFilters}
+              className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-md shadow-sm w-full sm:w-auto justify-center"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path>
+              </svg>
+              Reset
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Desktop Filters */}
+        <div className="hidden sm:flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-300">Status:</label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 px-3 py-1.5 text-sm"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-300">
+              Department:
+            </label>
+            <select
+              value={filterDepartment}
+              onChange={(e) => setFilterDepartment(e.target.value)}
+              className="bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 px-3 py-1.5 text-sm"
+            >
+              <option value="all">All Departments</option>
+              {departments.map((dept, index) => (
+                <option key={index} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Results count */}
+          <div className="ml-auto flex items-center text-gray-300 text-sm">
+            <span>
+              {filteredAdmins.length}{" "}
+              {filteredAdmins.length === 1 ? "admin" : "admins"} found
+            </span>
+          </div>
+        </div>
+
+        {/* Mobile Filters */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              variants={filterVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="sm:hidden mt-4 space-y-4 overflow-hidden"
+            >
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Status:
+                </label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-sm"
+                >
+                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Department:
+                </label>
+                <select
+                  value={filterDepartment}
+                  onChange={(e) => setFilterDepartment(e.target.value)}
+                  className="bg-gray-700 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-sm"
+                >
+                  <option value="all">All Departments</option>
+                  {departments.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Results count */}
+              <div className="text-gray-300 text-sm py-2">
+                <span>
+                  {filteredAdmins.length}{" "}
+                  {filteredAdmins.length === 1 ? "admin" : "admins"} found
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -296,72 +597,88 @@ function AdminList() {
       )}
 
       {admins.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <p className="text-gray-500">
-            No admins found. Create a new admin to get started.
-          </p>
+        <div className="bg-gray-800 text-gray-200 rounded-lg shadow-md p-6 text-center">
+          <p>No admins found. Create a new admin to get started.</p>
+        </div>
+      ) : filteredAdmins.length === 0 ? (
+        <div className="bg-gray-800 text-gray-200 rounded-lg shadow-md p-6 text-center">
+          <p>No admins match your search or filter criteria.</p>
+          <button
+            onClick={resetFilters}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Clear Filters
+          </button>
         </div>
       ) : (
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="bg-white rounded-lg shadow-lg overflow-hidden"
+          className="bg-gray-800 rounded-lg shadow-lg overflow-hidden"
         >
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Username
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Role
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Department
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {admins.map((admin) => (
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {filteredAdmins.map((admin) => (
                   <motion.tr
                     key={admin._id}
                     variants={itemVariants}
-                    className="hover:bg-gray-50"
+                    className="hover:bg-gray-700"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {admin.fullName}
+                      <div className="flex flex-col">
+                        <div className="text-sm font-medium text-gray-200">
+                          {admin.fullName}
+                        </div>
+                        <div className="sm:hidden text-xs text-gray-400">
+                          {admin.username} • {admin.role}
+                        </div>
+                        <div className="lg:hidden text-xs text-gray-400">
+                          {admin.email}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">
                         {admin.username}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{admin.role}</div>
+                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">{admin.role}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                    <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">
                         {admin.department}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{admin.email}</div>
+                    <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">{admin.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -378,7 +695,7 @@ function AdminList() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(admin)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-indigo-400 hover:text-indigo-200"
                           title="Edit"
                         >
                           <svg
@@ -394,8 +711,8 @@ function AdminList() {
                           onClick={() => handleToggleActive(admin)}
                           className={`${
                             admin.isActive
-                              ? "text-red-600 hover:text-red-900"
-                              : "text-green-600 hover:text-green-900"
+                              ? "text-red-400 hover:text-red-300"
+                              : "text-green-400 hover:text-green-300"
                           }`}
                           title={admin.isActive ? "Deactivate" : "Activate"}
                         >
@@ -422,7 +739,7 @@ function AdminList() {
                         </button>
                         <button
                           onClick={() => handleDelete(admin._id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-400 hover:text-red-300"
                           title="Delete"
                         >
                           <svg
@@ -461,15 +778,15 @@ function AdminList() {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
-              className="bg-white rounded-lg shadow-xl w-full max-w-md"
+              className="bg-gray-800 text-gray-200 rounded-lg shadow-xl w-full max-w-md"
             >
-              <div className="flex justify-between items-center border-b px-6 py-4">
-                <h3 className="text-xl font-semibold text-gray-900">
+              <div className="flex justify-between items-center border-b border-gray-700 px-6 py-4">
+                <h3 className="text-xl font-semibold">
                   {isEditing ? "Edit Admin" : "Add New Admin"}
                 </h3>
                 <button
                   onClick={handleCloseForm}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-200"
                 >
                   <svg
                     className="h-6 w-6"
@@ -490,7 +807,7 @@ function AdminList() {
               <form onSubmit={handleSubmit} className="p-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Full Name *
                     </label>
                     <input
@@ -499,12 +816,12 @@ function AdminList() {
                       value={formData.fullName}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
                   <div className="col-span-2 sm:col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Username *
                     </label>
                     <input
@@ -514,15 +831,15 @@ function AdminList() {
                       onChange={handleChange}
                       required
                       disabled={isEditing}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-                        isEditing ? "bg-gray-100" : ""
+                      className={`w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                        isEditing ? "opacity-70 cursor-not-allowed" : ""
                       }`}
                     />
                   </div>
 
                   {!isEditing && (
                     <div className="col-span-2 sm:col-span-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
                         Password *
                       </label>
                       <input
@@ -531,13 +848,13 @@ function AdminList() {
                         value={formData.password}
                         onChange={handleChange}
                         required={!isEditing}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   )}
 
                   <div className="col-span-2 sm:col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Role *
                     </label>
                     <input
@@ -546,12 +863,12 @@ function AdminList() {
                       value={formData.role}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
                   <div className="col-span-2 sm:col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Department *
                     </label>
                     <input
@@ -560,12 +877,20 @@ function AdminList() {
                       value={formData.department}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      list="department-options"
                     />
+                    {departments.length > 0 && (
+                      <datalist id="department-options">
+                        {departments.map((dept, index) => (
+                          <option key={index} value={dept} />
+                        ))}
+                      </datalist>
+                    )}
                   </div>
 
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Email *
                     </label>
                     <input
@@ -574,12 +899,12 @@ function AdminList() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Contact Number
                     </label>
                     <input
@@ -587,7 +912,7 @@ function AdminList() {
                       name="contactNumber"
                       value={formData.contactNumber}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -598,7 +923,7 @@ function AdminList() {
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={handleCloseForm}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 bg-gray-700 shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500"
                   >
                     Cancel
                   </motion.button>
@@ -606,7 +931,7 @@ function AdminList() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="submit"
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500"
                   >
                     {isEditing ? "Update Admin" : "Create Admin"}
                   </motion.button>

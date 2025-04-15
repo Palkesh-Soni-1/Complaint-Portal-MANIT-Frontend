@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
         const res = await studentLogin({username,password});
         const authData = {
           userData: res,
-          token: res.token,
+          token: res?.token,
           role: "student",
         };
         setAuth(authData);
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
         const res = await loginAdmin({ username, password });
         const authData = {
           userData: res,
-          token: res.token,
+          token: res?.token,
           role: "admin",
         };
         setAuth(authData);
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         const res = await loginSuperAdmin({ username, password });
         const authData = {
           userData: res,
-          token: res.token,
+          token: res?.token,
           role: "superadmin",
         };
         setAuth(authData);
