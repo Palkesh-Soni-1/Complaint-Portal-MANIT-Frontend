@@ -1,13 +1,74 @@
-function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
+import React, { useEffect, useState } from "react";
+import { useParams, useLocation,useNavigate } from "react-router-dom";
+
+import Loader from "../../components/Loader";
+import { useAuth } from "../../context/AuthContext";
+import { useData } from "../../context/DataContext";
+
+
+
+function ComplaintViewPage() {
+
+    const { complaintNumber } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { auth,studentId } = useAuth();
+    const { info } = useData();
+
+    // You can get the complaint object from location.state if you passed it
+    const [complaint, setComplaint] = useState(
+      location.state?.complaint || null
+    );
+
+    const [loading, setLoading] = useState(!complaint);
+
+    useEffect(() => {
+      if (!complaint && auth && info?.studentId) {
+        setLoading(true);
+        const token = localStorage.getItem("site_token");
+        fetch(
+          `${
+            import.meta.env.VITE_SITE
+          }/complaint/getID?complaintNumber=${complaintNumber}&studentId=${studentId}`,
+          {
+            method:"GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then((json) => setComplaint(json.data))
+          .catch(console.error)
+          .finally(() => setLoading(false));
+        console.log(complaint)
+      }
+    }, [complaint, auth, info, complaintNumber]);
+
+    if (loading) return <div className="min-h-[70vh] flex justify-center items-center"><Loader /></div>;
+
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handleBackToList = () => {
+    navigate(-1);
+  };
+
+  if (!complaint) {
+    return (
+      <div className="text-center text-red-600 text-sm sm:text-base mt-6">
+        No complaint data found. Please go back and try again.
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="max-w-[1100px] mx-auto min-h-[70vh] py-5 px-2">
       <button
-        onClick={onBackToList}
+        onClick={handleBackToList}
         className="flex items-center text-gray-100 hover:text-gray-300 mb-6"
       >
         <svg
@@ -41,8 +102,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
               {complaint.complaintSubType}
             </span>
             <span
-              className={`px-2 py-1 sm:px-3 sm:py-1 text-xs font-semibold rounded-full 
-              ${
+              className={`px-2 py-1 sm:px-3 sm:py-1 text-xs font-semibold rounded-full ${
                 complaint.status === "resolved"
                   ? "bg-green-100 text-green-800"
                   : complaint.status === "processing"
@@ -50,15 +110,16 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                   : "bg-red-100 text-red-800"
               }`}
             >
-              {complaint.status.charAt(0).toUpperCase() +
-                complaint.status.slice(1)}
+              {complaint.status?.charAt(0)?.toUpperCase() +
+                complaint.status?.slice(1)}
             </span>
           </div>
         </div>
 
         <div className="border-t border-gray-200">
           <dl>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+            {/* Student Name */}
+            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Student Name
               </dt>
@@ -66,7 +127,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.studentName}
               </dd>
             </div>
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+
+            {/* Student ID */}
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Student ID
               </dt>
@@ -74,7 +137,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.studentId}
               </dd>
             </div>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+
+            {/* Hostel & Room */}
+            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Hostel & Room
               </dt>
@@ -82,7 +147,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 Hostel {complaint.hostelNumber}, Room {complaint.roomNumber}
               </dd>
             </div>
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+
+            {/* Complaint Type */}
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Complaint Type
               </dt>
@@ -90,7 +157,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.complaintType}
               </dd>
             </div>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+
+            {/* Complaint Subtype */}
+            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Complaint Subtype
               </dt>
@@ -98,7 +167,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                 {complaint.complaintSubType}
               </dd>
             </div>
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+
+            {/* Description */}
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Description
               </dt>
@@ -107,8 +178,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
               </dd>
             </div>
 
-            {complaint.processingFeedback && (
-              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+            {/* Processing Feedback */}
+            {complaint.processed && (
+              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                 <dt className="text-xs sm:text-sm font-medium text-gray-500">
                   Processing Feedback
                 </dt>
@@ -118,8 +190,9 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
               </div>
             )}
 
-            {complaint.closingFeedback && (
-              <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+            {/* Closing Feedback */}
+            {complaint.colsed && (
+              <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                 <dt className="text-xs sm:text-sm font-medium text-gray-500">
                   Closing Feedback
                 </dt>
@@ -129,16 +202,17 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
               </div>
             )}
 
-            {complaint.attachments && complaint.attachments.length > 0 && (
-              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+            {/* Attachments */}
+            {/* {complaint.attachments && complaint.attachments.length > 0 && (
+              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                 <dt className="text-xs sm:text-sm font-medium text-gray-500">
                   Attachments
                 </dt>
                 <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                   <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-                    {complaint.attachments.map((attachment, index) => (
+                    {complaint.attachments.map((attachment, idx) => (
                       <li
-                        key={index}
+                        key={idx}
                         className="pl-2 pr-3 py-2 sm:pl-3 sm:pr-4 sm:py-3 flex items-center justify-between text-xs sm:text-sm"
                       >
                         <div className="w-0 flex-1 flex items-center">
@@ -168,45 +242,16 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                   </ul>
                 </dd>
               </div>
-            )}
-            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+            )} */}
+
+            {/* Created At */}
+            <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Created At
               </dt>
               <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {new Date(complaint.createdAt).toLocaleString()}
               </dd>
-            </div>
-            <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5">
-              <h4 className="text-xs sm:text-sm font-medium text-gray-500 mb-3 sm:mb-4">
-                Admin Actions
-              </h4>
-              <div className="flex flex-wrap gap-2 sm:gap-0 sm:flex-nowrap sm:space-x-3">
-                {complaint.status === "open" && (
-                  <button
-                    onClick={() => onStatusUpdate(complaint._id, "processing")}
-                    className="text-xs sm:text-sm bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 sm:py-2 sm:px-4 rounded"
-                  >
-                    Mark as Processing
-                  </button>
-                )}
-                {complaint.status !== "resolved" && (
-                  <button
-                    onClick={() => onStatusUpdate(complaint._id, "resolved")}
-                    className="text-xs sm:text-sm bg-green-500 hover:bg-green-600 text-white py-1 px-3 sm:py-2 sm:px-4 rounded"
-                  >
-                    Mark as Resolved
-                  </button>
-                )}
-                {complaint.status === "resolved" && (
-                  <button
-                    onClick={() => onStatusUpdate(complaint._id, "open")}
-                    className="text-xs sm:text-sm bg-red-500 hover:bg-red-600 text-white py-1 px-3 sm:py-2 sm:px-4 rounded"
-                  >
-                    Reopen Complaint
-                  </button>
-                )}
-              </div>
             </div>
           </dl>
         </div>
@@ -215,4 +260,4 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
   );
 }
 
-export default ComplaintDetail;
+export default ComplaintViewPage;

@@ -72,6 +72,12 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     setSearchTerm("");
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case "resolved":
@@ -111,7 +117,6 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     }));
   };
 
-  
   return (
     <div className="max-w-[1100px] mx-auto my-4 md:my-6">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 md:p-4 rounded-t-lg">
@@ -264,14 +269,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
         </div>
 
         <div>
-          <div className="hidden md:grid md:grid-cols-5 border-t border-b border-blue-300 bg-white text-sm">
-            <div className="font-medium p-3 md:p-4">Complaint No.</div>
-            <div className="font-medium p-3 md:p-4">Student Details</div>
-            <div className="font-medium p-3 md:p-4">Type</div>
-            <div className="font-medium p-3 md:p-4">Date</div>
-            <div className="font-medium p-3 md:p-4">Status</div>
-          </div>
-
+          {/* Mobile View (from first code) */}
           <div className="sm:hidden">
             {filteredComplaints.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -306,7 +304,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                       {complaint.complaintType}
                     </div>
                     <div className="text-gray-600">Date:</div>
-                    <div>{complaint.dateReported}</div>
+                    <div>{formatDate(complaint.dateReported)}</div>
                   </div>
                   <div className="mt-3 flex gap-2">
                     {complaint.status === "open" && (
@@ -331,6 +329,15 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                       </button>
                     )}
 
+                    {complaint.status === "resolved" && (
+                      <button
+                        onClick={() => onStatusUpdate(complaint._id, "open")}
+                        className="text-xs bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded"
+                      >
+                        Reopen
+                      </button>
+                    )}
+
                     <button
                       onClick={() => onSelectComplaint(complaint._id)}
                       className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded"
@@ -343,7 +350,16 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
             )}
           </div>
 
+          {/* Desktop View (implementing the table from second code but with first code's structure) */}
           <div className="hidden sm:block">
+            <div className="hidden md:grid md:grid-cols-5 border-t border-b border-blue-300 bg-white text-sm">
+              <div className="font-medium p-3 md:p-4">Complaint No.</div>
+              <div className="font-medium p-3 md:p-4">Student Details</div>
+              <div className="font-medium p-3 md:p-4">Type</div>
+              <div className="font-medium p-3 md:p-4">Date</div>
+              <div className="font-medium p-3 md:p-4">Status</div>
+            </div>
+
             {filteredComplaints.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 No complaints match your filter criteria
@@ -386,36 +402,55 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                     )}
                   </div>
                   <div className="p-3 md:p-4 text-gray-600">
-                    {complaint.dateReported}
+                    {formatDate(complaint.dateReported)}
                   </div>
-                  <div className="p-3 md:p-4 flex flex-col gap-2">
+                  <div className="p-3 md:p-4 flex flex-col gap-2 relative">
                     <div>{getStatusBadge(complaint.status)}</div>
-                    <div className="flex space-x-2 flex-wrap space-y-2">
-                      {complaint.status === "open" && (
-                        <button
-                          onClick={() =>
-                            onStatusUpdate(complaint._id, "processing")
-                          }
-                          className="text-xs bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-                        >
-                          Process
+                    <div className="flex space-x-2">
+                      <div className="relative group">
+                        <button className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded">
+                          Update
                         </button>
-                      )}
-
-                      {complaint.status !== "resolved" && (
-                        <button
-                          onClick={() =>
-                            onStatusUpdate(complaint._id, "resolved")
-                          }
-                          className="text-xs bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded"
-                        >
-                          Resolve
-                        </button>
-                      )}
+                        <div className="absolute left-0 w-40 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                          {complaint.status === "open" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStatusUpdate(complaint._id, "processing");
+                              }}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                            >
+                              Mark as Processing
+                            </button>
+                          )}
+                          {complaint.status !== "resolved" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStatusUpdate(complaint._id, "resolved");
+                              }}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                            >
+                              Mark as Resolved
+                            </button>
+                          )}
+                          {complaint.status === "resolved" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStatusUpdate(complaint._id, "open");
+                              }}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                            >
+                              Reopen Complaint
+                            </button>
+                          )}
+                        </div>
+                      </div>
 
                       <button
                         onClick={() => onSelectComplaint(complaint._id)}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded"
+                        className="text-xs bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
                       >
                         View
                       </button>
@@ -424,6 +459,15 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                 </div>
               ))
             )}
+          </div>
+        </div>
+
+        {/* Pagination or results summary */}
+        <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+          <div className="text-sm text-gray-700">
+            Showing{" "}
+            <span className="font-medium">{filteredComplaints.length}</span> of{" "}
+            <span className="font-medium">{complaints.length}</span> complaints
           </div>
         </div>
       </div>

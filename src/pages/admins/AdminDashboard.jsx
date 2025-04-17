@@ -19,12 +19,24 @@ function AdminDashboard() {
     const fetchComplaints = async () => {
       setIsLoading(true);
       try {
+        const token = localStorage.getItem("token");
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
         const response = await fetch(
-          `${import.meta.env.VITE_SITE}/complaint/get/all`
+          `${import.meta.env.VITE_SITE}/complaint/get/all`,
+          {
+            method: "GET",
+            headers: headers,
+          }
         );
+
         if (!response.ok) {
           throw new Error("Failed to fetch complaints");
         }
+
         const data = await response.json();
         setComplaints(data.data);
       } catch (error) {
@@ -37,7 +49,6 @@ function AdminDashboard() {
     fetchComplaints();
   }, []);
 
-  // console.log(complaints)
   const totalComplaints = complaints.length;
   const openComplaints = complaints.filter((c) => c.status === "open").length;
   const processingComplaints = complaints.filter(

@@ -1,14 +1,19 @@
 import React from "react";
 import {Routes, Route,Navigate } from "react-router-dom";
 import Layout from "./Layout/Layout";
+
 import Home from "./pages/students/Home";
 import Login from "./pages/Login";
 import Profile from "./pages/students/Profile";
 import Complaint from "./pages/students/Complaint";
+import ComplaintViewPage from "./pages/students/ComplaintViewPage";
+
 import AdminDashboard from "./pages/admins/AdminDashboard";
 import AdminManageComplaints from "./pages/admins/AdminManageComplaints";
+
 import SuperAdminProfile from "./pages/superAdmin/SuperAdminProfile";
 import AdminList from "./pages/superAdmin/AdminList";
+
 import Loader from "./components/Loader";
 import { useAuth } from "./context/AuthContext";
 import { useData } from "./context/DataContext";
@@ -41,6 +46,14 @@ const App = () => {
           element={
             <ProtectedRoute role="student">
               <Complaint />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/complaints/:complaintNumber"
+          element={
+            <ProtectedRoute role="student">
+              <ComplaintViewPage />
             </ProtectedRoute>
           }
         />

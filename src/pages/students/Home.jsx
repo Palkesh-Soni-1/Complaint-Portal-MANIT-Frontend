@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Loader from "../../components/Loader";
+import { NavLink } from "react-router-dom";
 
 import { useData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
@@ -34,10 +35,19 @@ function Home() {
     const fetchComplaintsById = async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem("site_token");
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
         const res = await fetch(
           `${import.meta.env.VITE_SITE}/complaint/get?studentId=${
             info?.studentId
-          }`
+          }`,
+          {
+            method: "GET",
+            headers: headers,
+          }
         );
         if (res.ok) {
           const data = (await res.json()).data;
@@ -166,17 +176,17 @@ function Home() {
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const navLink = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
+    navLink.setAttribute("href", url);
+    navLink.setAttribute(
       "download",
       `complaints_${new Date().toISOString().slice(0, 10)}.csv`
     );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    navLink.style.visibility = "hidden";
+    document.body.appendChild(navLink);
+    navLink.click();
+    document.body.removeChild(navLink);
   };
 
   const toggleFilters = () => {
@@ -345,17 +355,19 @@ function Home() {
               <div>
                 <div className="sm:hidden">
                   {filteredComplaints.map((complaint, index) => (
-                    <div
-                      key={index}
+                    <NavLink
+                      key={complaint.complaintNumber}
+                      to={`/student/complaints/${complaint.complaintNumber}`}
+                      state={{ complaint }}
                       className="border-b border-blue-100 p-3 hover:bg-blue-50"
                     >
-                      <div className="flex justify-between items-center mb-2">
+                      <div className="flex justify-between items-center mb-2 px-2">
                         <div className="text-blue-600 font-medium">
                           {complaint.complaintNumber}
                         </div>
                         <div>{getStatusBadge(complaint.status)}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2 px-2">
                         <div className="text-gray-600">Date:</div>
                         <div>{complaint.dateReported}</div>
                         <div className="text-gray-600">Type:</div>
@@ -363,16 +375,18 @@ function Home() {
                           {complaint.complaintType}
                         </div>
                       </div>
-                    </div>
+                    </NavLink>
                   ))}
                 </div>
 
                 <div className="hidden sm:block">
                   {filteredComplaints.map((complaint, index) => (
-                    <div
-                      key={index}
+                    <NavLink
+                      key={complaint.complaintNumber}
+                      to={`/student/complaints/${complaint.complaintNumber}`}
+                      state={{ complaint }}
                       className="grid grid-cols-4 border-b border-blue-300 text-sm hover:bg-blue-50"
-                    >
+                >
                       <div className="p-3 sm:p-4 text-blue-600">
                         {complaint.complaintNumber}
                       </div>
@@ -385,7 +399,7 @@ function Home() {
                       <div className="p-3 sm:p-4">
                         {getStatusBadge(complaint.status)}
                       </div>
-                    </div>
+                    </NavLink>
                   ))}
                 </div>
               </div>

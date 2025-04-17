@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import converter from "../services/studentDataConversion";
 import { studentLogin } from "../services/studentDataFetch";
-import { loginAdmin } from "../services/loginServices";
+import { getStudentSiteToken, loginAdmin } from "../services/loginServices";
 import { loginSuperAdmin } from "../services/loginServices";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [studentId,setStudentId] = useState();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,11 +27,16 @@ export const AuthProvider = ({ children }) => {
     try { 
       if(userType==="student"){
         const res = await studentLogin({username,password});
+        if(res?.token==null){
+          setAuth(null);
+          return;
+        }
         const authData = {
           userData: res,
           token: res?.token,
           role: "student",
         };
+
         setAuth(authData);
         localStorage.setItem("auth", JSON.stringify(authData));
       }
@@ -129,10 +135,32 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("auth");
       localStorage.removeItem("token");
       throw error;
-    } finally {
+    }
+    finally{
       setIsLoading(false);
     }
   };
+
+  useEffect(()=>{
+    const makeSiteToken=async()=>{
+      setIsLoading(true);
+      try {
+        const res = await getStudentSiteToken({
+          studentId: auth?.userData?.userInfo?.uid,
+          logout,
+        });
+      } catch (err) {
+        console.log("Error: ", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if(auth && auth?.role=="student"){
+      setStudentId(auth?.userData?.userInfo?.uid);
+      makeSiteToken();
+    }
+  },[auth])
 
   const logout = () => {
     setAuth(null);
@@ -149,7 +177,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ auth, login, logout, isLoading, setIsLoading,complaints, setComplaints }}
+      value={{ auth, login, logout, isLoading, setIsLoading,complaints, setComplaints,studentId }}
     >
       {children}
     </AuthContext.Provider>

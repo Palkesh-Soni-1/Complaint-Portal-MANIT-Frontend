@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useData } from "../context/DataContext";
 import Loader from "./Loader";
+import { useAuth } from "../context/AuthContext";
 const ComplaintForm = () => {
+  const {studentId} =useAuth();
   const {info}=useData();
   const [isLoading,setIsLoading]=useState(false);
   const [formData, setFormData] = useState({
@@ -127,10 +129,12 @@ const ComplaintForm = () => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
       try{
-        const res = await fetch(`${import.meta.env.VITE_SITE}/complaint/post`, {
+        const token = localStorage.getItem("site_token");
+        const res = await fetch(`${import.meta.env.VITE_SITE}/complaint/post?studentId=${studentId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         });

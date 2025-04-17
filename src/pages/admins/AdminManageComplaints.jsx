@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from "react";
 import ComplaintsList from "../../components/ComplaintsList";
 import ComplaintDetail from "../../components/ComplaintDetail";
+import StatusUpdateModal from "../../components/StatusUpdateModal";
 import { useAuth } from "../../context/AuthContext";
 import Loader from "../../components/Loader";
+
 const AdminManageComplaints = () => {
+  const { complaints, setComplaints } = useAuth();
+
   const [activeView, setActiveView] = useState("list");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const { complaints, setComplaints } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [pendingStatusUpdate, setPendingStatusUpdate] = useState({
+    id: null,
+    status: "",
+  });
 
   const handleSelectComplaint = (id) => {
     const complaint = complaints.find((c) => c._id === id);
@@ -15,28 +23,32 @@ const AdminManageComplaints = () => {
     setActiveView("detail");
   };
 
-  const handleStatusUpdate = async (id, newStatus) => {
-    setComplaints(
-      complaints.map((complaint) =>
-        complaint._id === id ? { ...complaint, status: newStatus } : complaint
-      )
-    );
+  const openStatusUpdateModal = (id, newStatus) => {
+    setPendingStatusUpdate({ id, status: newStatus });
+    setStatusModalOpen(true);
+  };
 
-    if (selectedComplaint && selectedComplaint._id === id) {
-      setSelectedComplaint({ ...selectedComplaint, status: newStatus });
-    }
+  const closeStatusUpdateModal = () => {
+    setStatusModalOpen(false);
+    setPendingStatusUpdate({ id: null, status: "" });
+  };
+
+  const handleStatusUpdate = async (id, newStatus, feedback) => {
     try {
       setIsLoading(true);
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_SITE}/complaint/status`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             complaintId: id,
             status: newStatus,
+            feedback: feedback,
           }),
         }
       );
@@ -53,7 +65,13 @@ const AdminManageComplaints = () => {
           complaint._id === id ? { ...complaint, status: newStatus } : complaint
         )
       );
-      // alert(`Complaint status updated to ${newStatus}`);
+
+      if (selectedComplaint && selectedComplaint._id === id) {
+        setSelectedComplaint({ ...selectedComplaint, status: newStatus });
+      }
+
+      // Success message
+      alert(`Complaint status updated to ${newStatus}`);
     } catch (error) {
       console.error("Error updating complaint status:", error);
       alert("Failed to update complaint status");
@@ -71,8 +89,17 @@ const AdminManageComplaints = () => {
     const fetchComplaints = async () => {
       try {
         setIsLoading(true);
+        const token = localStorage.getItem("token");
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
         const response = await fetch(
-          `${import.meta.env.VITE_SITE}/complaint/get/all`
+          `${import.meta.env.VITE_SITE}/complaint/get/all`,
+          {
+            method: "GET",
+            headers: headers,
+          }
         );
         if (!response.ok) {
           throw new Error("Failed to fetch complaints");
@@ -81,8 +108,7 @@ const AdminManageComplaints = () => {
         setComplaints(data.data);
       } catch (error) {
         console.error("Error fetching complaints:", error);
-      }
-      finally{
+      } finally {
         setIsLoading(false);
       }
     };
@@ -94,7 +120,7 @@ const AdminManageComplaints = () => {
     <div className="max-w-[1100px] mx-auto my-5 min-h-[70vh] px-2">
       {isLoading ? (
         <div className="min-h-[70vh] flex justify-center items-center">
-            <Loader />
+          <Loader />
         </div>
       ) : (
         <div>
@@ -102,7 +128,7 @@ const AdminManageComplaints = () => {
             <ComplaintsList
               complaints={complaints}
               onSelectComplaint={handleSelectComplaint}
-              onStatusUpdate={handleStatusUpdate}
+              onStatusUpdate={openStatusUpdateModal}
             />
           )}
 
@@ -110,9 +136,17 @@ const AdminManageComplaints = () => {
             <ComplaintDetail
               complaint={selectedComplaint}
               onBackToList={handleBackToList}
-              onStatusUpdate={handleStatusUpdate}
+              onStatusUpdate={openStatusUpdateModal}
             />
           )}
+
+          <StatusUpdateModal
+            isOpen={statusModalOpen}
+            onClose={closeStatusUpdateModal}
+            onConfirm={handleStatusUpdate}
+            complaintId={pendingStatusUpdate.id}
+            statusType={pendingStatusUpdate.status}
+          />
         </div>
       )}
     </div>
