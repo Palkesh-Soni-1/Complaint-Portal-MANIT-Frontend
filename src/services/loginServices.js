@@ -1,5 +1,3 @@
-import { useAuth } from "../context/AuthContext";
-
 export async function loginAdmin({ username, password }) {
   try {
     const response = await fetch(`${import.meta.env.VITE_SITE}/admin/login`, {

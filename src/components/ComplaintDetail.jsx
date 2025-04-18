@@ -1,3 +1,4 @@
+
 function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -107,29 +108,32 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
               </dd>
             </div>
 
-            {complaint.processingFeedback && (
-              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500">
-                  Processing Feedback
-                </dt>
-                <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {complaint.processingFeedback}
-                </dd>
+            {complaint.status !== "open" ? (
+              <div>
+                {complaint.processed && (
+                <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+                  <dt className="text-xs sm:text-sm font-medium text-gray-500">
+                    Processing Feedback
+                  </dt>
+                  <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {complaint.processingFeedback}
+                  </dd>
+                </div>
+                )} 
+                {complaint.closed && (
+                <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+                  <dt className="text-xs sm:text-sm font-medium text-gray-500">
+                    Closing Feedback
+                  </dt>
+                  <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {complaint.closingFeedback}
+                  </dd>
+                </div>
+                )}
               </div>
-            )}
+            ) : null}
 
-            {complaint.closingFeedback && (
-              <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500">
-                  Closing Feedback
-                </dt>
-                <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {complaint.closingFeedback}
-                </dd>
-              </div>
-            )}
-
-            {complaint.attachments && complaint.attachments.length > 0 && (
+            {/* {complaint.attachments && complaint.attachments.length > 0 && (
               <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
                 <dt className="text-xs sm:text-sm font-medium text-gray-500">
                   Attachments
@@ -168,7 +172,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
                   </ul>
                 </dd>
               </div>
-            )}
+            )} */}
             <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
               <dt className="text-xs sm:text-sm font-medium text-gray-500">
                 Created At

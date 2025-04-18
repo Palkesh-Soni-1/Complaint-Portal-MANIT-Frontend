@@ -42,23 +42,31 @@ export const AuthProvider = ({ children }) => {
       }
       else if(userType==="admin"){
         const res = await loginAdmin({ username, password });
-        const authData = {
-          userData: res,
-          token: res?.token,
-          role: "admin",
-        };
-        setAuth(authData);
-        localStorage.setItem("auth", JSON.stringify(authData));
+        // if(res?.id==null){
+        //   setAuth(null);
+        //   return;
+        // }
+        if(res){
+          const authData = {
+            userData: res,
+            token: res?.token,
+            role: "admin",
+          };
+          setAuth(authData);
+          localStorage.setItem("auth", JSON.stringify(authData));
+        }
       }
       else if(userType==="superadmin"){
         const res = await loginSuperAdmin({ username, password });
-        const authData = {
-          userData: res,
-          token: res?.token,
-          role: "superadmin",
-        };
-        setAuth(authData);
-        localStorage.setItem("auth", JSON.stringify(authData));
+        if(res){
+          const authData = {
+            userData: res,
+            token: res?.token,
+            role: "superadmin",
+          };
+          setAuth(authData);
+          localStorage.setItem("auth", JSON.stringify(authData));
+        }
       }
       // ----------------- ADMIN --------------------
       // if (ldapId === "admin" && password === "123") {

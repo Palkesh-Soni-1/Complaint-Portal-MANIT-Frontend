@@ -15,7 +15,7 @@ function ComplaintViewPage() {
     const { auth,studentId } = useAuth();
     const { info } = useData();
 
-    // You can get the complaint object from location.state if you passed it
+    // Getting complaint from location state
     const [complaint, setComplaint] = useState(
       location.state?.complaint || null
     );
@@ -40,9 +40,8 @@ function ComplaintViewPage() {
         )
           .then((res) => res.json())
           .then((json) => setComplaint(json.data))
-          .catch(console.error)
+          .catch((error)=>console.log(error))
           .finally(() => setLoading(false));
-        console.log(complaint)
       }
     }, [complaint, auth, info, complaintNumber]);
 
@@ -178,29 +177,30 @@ function ComplaintViewPage() {
               </dd>
             </div>
 
-            {/* Processing Feedback */}
-            {complaint.processed && (
-              <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500">
-                  Processing Feedback
-                </dt>
-                <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {complaint.processingFeedback}
-                </dd>
+            {complaint.status !== "open" ? (
+              <div>
+                {complaint.processed && (
+                <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+                  <dt className="text-xs sm:text-sm font-medium text-gray-500">
+                    Processing Feedback
+                  </dt>
+                  <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {complaint.processingFeedback}
+                  </dd>
+                </div>
+                )} 
+                {complaint.resolved && (
+                <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+                  <dt className="text-xs sm:text-sm font-medium text-gray-500">
+                    Resolving Feedback
+                  </dt>
+                  <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    {complaint.resolvingFeedback}
+                  </dd>
+                </div>
+                )}
               </div>
-            )}
-
-            {/* Closing Feedback */}
-            {complaint.colsed && (
-              <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
-                <dt className="text-xs sm:text-sm font-medium text-gray-500">
-                  Closing Feedback
-                </dt>
-                <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {complaint.closingFeedback}
-                </dd>
-              </div>
-            )}
+            ) : null}
 
             {/* Attachments */}
             {/* {complaint.attachments && complaint.attachments.length > 0 && (

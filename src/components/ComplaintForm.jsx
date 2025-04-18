@@ -141,7 +141,7 @@ const ComplaintForm = () => {
         if (res.ok) {
           setIsLoading(false);
           alert("Complaint Submitted Successfully");
-          console.log(await res.json())
+          // console.log(await res.json())
         }
       }
       catch(error){

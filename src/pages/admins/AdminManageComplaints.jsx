@@ -62,12 +62,12 @@ const AdminManageComplaints = () => {
       // Update the local state with the new data
       setComplaints((prevComplaints) =>
         prevComplaints.map((complaint) =>
-          complaint._id === id ? { ...complaint, status: newStatus } : complaint
+          complaint._id === id ? updatedComplaint  : complaint
         )
       );
 
       if (selectedComplaint && selectedComplaint._id === id) {
-        setSelectedComplaint({ ...selectedComplaint, status: newStatus });
+        setSelectedComplaint(updatedComplaint);
       }
 
       // Success message
