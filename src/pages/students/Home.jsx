@@ -8,6 +8,8 @@ import {
   Calendar,
   Filter,
   ChevronRight,
+  UserCheck,
+  X,
 } from "lucide-react";
 import Loader from "../../components/Loader";
 import { NavLink } from "react-router-dom";
@@ -15,9 +17,11 @@ import { NavLink } from "react-router-dom";
 import { useData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
 
+import { fetchComplaintsByStudentId } from "../../services/api/complaint";
+
 function Home() {
-  const {auth}=useAuth();
-  const {info}=useData();
+  const { auth } = useAuth();
+  const { info } = useData();
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,39 +36,15 @@ function Home() {
   });
 
   useEffect(() => {
-    const fetchComplaintsById = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("site_token");
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-        const res = await fetch(
-          `${import.meta.env.VITE_SITE}/complaint/get?studentId=${
-            info?.studentId
-          }`,
-          {
-            method: "GET",
-            headers: headers,
-          }
-        );
-        if (res.ok) {
-          const data = (await res.json()).data;
-          setComplaints(data);
-          setFilteredComplaints(data);
-        }
-      } catch (err) {
-        console.log("Failed To Fetch Complaints");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (auth && info?.studentId) {
-      fetchComplaintsById();
+    if (auth.isAuthenticated && info?.studentId) {
+      fetchComplaintsByStudentId({
+        setLoading,
+        setComplaints,
+        studentId: info?.studentId,
+        setFilteredComplaints,
+      });
     }
-  }, [auth,info]);
+  }, [auth, info]);
 
   useEffect(() => {
     applyFilters();
@@ -129,32 +109,47 @@ function Home() {
     setSearchTerm("");
   };
 
+  // Status badge component
   const getStatusBadge = (status) => {
     switch (status) {
       case "resolved":
         return (
-          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-6">
+          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
             <Check size={14} />
             <span className="xs:inline">Resolved</span>
           </div>
         );
       case "open":
         return (
-          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-6">
+          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
             <AlertCircle size={14} />
             <span className="xs:inline">Open</span>
           </div>
         );
       case "processing":
         return (
-          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-6">
+          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
             <Clock size={14} />
             <span className="xs:inline">Processing</span>
           </div>
         );
+      case "assigned":
+        return (
+          <div className="bg-blue-300 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <UserCheck size={14} />
+            <span className="xs:inline">Assigned</span>
+          </div>
+        );
+      case "rejected":
+        return (
+          <div className="bg-gray-300 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <X size={14} />
+            <span className="xs:inline">Rejected</span>
+          </div>
+        );
       default:
         return (
-          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-6">
+          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-4">
             {status}
           </div>
         );
@@ -196,7 +191,6 @@ function Home() {
   return (
     <div className="max-w-[1100px] mx-auto my-4 md:my-10 px-2 font-sans min-h-screen rounded-lg md:rounded-xl">
       <div className="overflow-hidden">
-
         <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-3 md:p-4 border-b border-blue-300 flex justify-between items-center">
           <h1 className="text-base md:text-lg font-bold text-blue-100">
             Complaints ({filteredComplaints.length})
@@ -241,7 +235,6 @@ function Home() {
         </div>
 
         <div className="bg-white rounded-lg overflow-hidden shadow-md">
-
           <div
             className={`border-b border-blue-100 transition-all duration-300 overflow-hidden ${
               isFilterOpen ? "max-h-96" : "max-h-0"
@@ -255,7 +248,6 @@ function Home() {
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-
                   <div className="flex flex-col gap-1">
                     <label htmlFor="status" className="text-sm text-gray-600">
                       Status:
@@ -268,11 +260,12 @@ function Home() {
                     >
                       <option value="all">All</option>
                       <option value="open">Open</option>
+                      <option value="assigned">Assigned</option>
                       <option value="processing">Processing</option>
                       <option value="resolved">Resolved</option>
+                      <option value="rejected">Rejected</option>
                     </select>
                   </div>
-
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm text-gray-600 flex items-center gap-1">
@@ -288,7 +281,6 @@ function Home() {
                       className="border border-gray-300 rounded-md px-2 py-2 text-sm"
                     />
                   </div>
-
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm text-gray-600">To:</label>
@@ -345,7 +337,7 @@ function Home() {
 
             {loading ? (
               <div className="text-center py-8 text-gray-500">
-                <Loader/>
+                <Loader />
               </div>
             ) : filteredComplaints.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -386,7 +378,7 @@ function Home() {
                       to={`/student/complaints/${complaint.complaintNumber}`}
                       state={{ complaint }}
                       className="grid grid-cols-4 border-b border-blue-300 text-sm hover:bg-blue-50"
-                >
+                    >
                       <div className="p-3 sm:p-4 text-blue-600">
                         {complaint.complaintNumber}
                       </div>

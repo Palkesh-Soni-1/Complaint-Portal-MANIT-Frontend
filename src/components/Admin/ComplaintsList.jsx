@@ -6,6 +6,8 @@ import {
   Check,
   Clock,
   AlertCircle,
+  UserCheck,
+  X,
 } from "lucide-react";
 
 function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
@@ -101,6 +103,20 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
             <span className="xs:inline">Processing</span>
           </div>
         );
+      case "assigned":
+        return (
+          <div className="bg-blue-300 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <UserCheck size={14} />
+            <span className="xs:inline">Assigned</span>
+          </div>
+        );
+      case "rejected":
+        return (
+          <div className="bg-gray-300 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <X size={14} />
+            <span className="xs:inline">Rejected</span>
+          </div>
+        );
       default:
         return (
           <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-4">
@@ -181,7 +197,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                     className="border border-gray-300 rounded-md px-2 py-2 text-sm"
                   >
                     <option value="all">All Status</option>
-                    <option value="open">Open</option>
+                    <option value="assigned">Assigned</option>
                     <option value="processing">Processing</option>
                     <option value="resolved">Resolved</option>
                   </select>
@@ -307,7 +323,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                     <div>{formatDate(complaint.dateReported)}</div>
                   </div>
                   <div className="mt-3 flex gap-2">
-                    {complaint.status === "open" && (
+                    {complaint.status === "assigned" && (
                       <button
                         onClick={() =>
                           onStatusUpdate(complaint._id, "processing")
@@ -412,7 +428,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                           Update
                         </button>
                         <div className="absolute left-0 w-40 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
-                          {complaint.status === "open" && (
+                          {complaint.status === "assigned" && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

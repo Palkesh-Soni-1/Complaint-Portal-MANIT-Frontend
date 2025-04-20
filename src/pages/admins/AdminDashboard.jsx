@@ -10,47 +10,18 @@ import {
 import { NavLink } from "react-router-dom";
 import Loader from "../../components/Loader";
 import { useAuth } from "../../context/AuthContext";
+import { fetchAssignedComplaints } from "../../services/api/complaint";
 function AdminDashboard() {
-  const { complaints, setComplaints } = useAuth();
+  const { complaints, setComplaints, auth } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchComplaints = async () => {
-      setIsLoading(true);
-      try {
-        const token = localStorage.getItem("token");
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        const response = await fetch(
-          `${import.meta.env.VITE_SITE}/complaint/get/all`,
-          {
-            method: "GET",
-            headers: headers,
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch complaints");
-        }
-
-        const data = await response.json();
-        setComplaints(data.data);
-      } catch (error) {
-        console.error("Error fetching complaints:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchComplaints();
+    fetchAssignedComplaints({setIsLoading,setComplaints, adminId:auth?.userData?.id});
   }, []);
 
   const totalComplaints = complaints.length;
-  const openComplaints = complaints.filter((c) => c.status === "open").length;
+  const assignedComplaints = complaints.filter((c) => c.status === "assigned").length;
   const processingComplaints = complaints.filter(
     (c) => c.status === "processing"
   ).length;
@@ -62,7 +33,7 @@ function AdminDashboard() {
     .slice(0, 5);
 
   const pieData = [
-    { name: "Open", value: openComplaints, color: "#EF4444" },
+    { name: "Assigned", value: assignedComplaints, color: "#3B82F6" },
     { name: "Processing", value: processingComplaints, color: "#F59E0B" },
     { name: "Resolved", value: resolvedComplaints, color: "#10B981" },
   ];
@@ -129,9 +100,9 @@ function AdminDashboard() {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-600">Open</h3>
+                  <h3 className="text-lg font-medium text-gray-600">Assigned</h3>
                   <p className="text-2xl font-bold text-gray-800">
-                    {openComplaints}
+                    {assignedComplaints}
                   </p>
                 </div>
               </div>

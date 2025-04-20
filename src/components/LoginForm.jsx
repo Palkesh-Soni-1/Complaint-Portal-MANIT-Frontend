@@ -46,6 +46,7 @@ const LoginForm = () => {
                 onChange={(e) => setUserType(e.target.value)}
               >
                 <option value="student">Student</option>
+                <option value="intermediate">Intermediate</option>
                 <option value="admin">Admin</option>
                 <option value="superadmin">Superadmin</option>
               </select>

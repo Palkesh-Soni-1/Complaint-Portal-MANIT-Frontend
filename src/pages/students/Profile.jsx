@@ -7,8 +7,6 @@ import {
   Calendar,
   Book,
   Hash,
-  Award,
-  CircleUserRound,
   User,
   Users,
   Globe,
@@ -23,7 +21,6 @@ import {
   Vote,
   Building,
   Heart,
-  ShieldAlert,
   AtSign,
 } from "lucide-react";
 import { useData } from "../../context/DataContext";

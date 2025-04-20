@@ -1,5 +1,5 @@
 import React from 'react'
-import ComplaintForm from '../../components/ComplaintForm'
+import ComplaintForm from '../../components/Student/ComplaintForm';
 const Complaint = () => {
   return (
     <div className="py-4 px-2 min-h-screen max-w-[1100px] mx-auto m-5">

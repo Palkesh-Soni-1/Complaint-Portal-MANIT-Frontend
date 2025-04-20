@@ -3,11 +3,14 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 const DataContext = createContext();
 export const useData = () => useContext(DataContext);
 
-
-import { studentProfileCheck, studentResult } from "../services/studentDataFetch";
-import { studentProfile } from "../services/studentDataFetch";
+import {
+  studentProfileCheck,
+  studentResult,
+  studentProfile,
+} from "../services/api/studentdata"
+import infoConverter from "../services/repository/transformStudentInfo";
 import { useAuth } from "./AuthContext";
-import infoConverter from "../services/studentInfoConversion";
+
 
 export const DataProvider = ({ children }) => {
   
@@ -40,7 +43,7 @@ export const DataProvider = ({ children }) => {
         setIsLoadingData(false);
       }
     }
-    if(auth && auth?.role=="student"){
+    if((auth.isAuthenticated) && auth?.role==="student"){
       fun();
     }
   },[auth])

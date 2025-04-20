@@ -1,19 +1,36 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import converter from "../services/studentDataConversion";
-import { studentLogin } from "../services/studentDataFetch";
-import { getStudentSiteToken, loginAdmin } from "../services/loginServices";
-import { loginSuperAdmin } from "../services/loginServices";
+
+// Auth Functions ---------------------------------------------
+import {
+  studentLogin,
+  getStudentSiteToken,
+  loginAdmin,
+  loginSuperAdmin,
+  loginIntermediate,
+} from "../services/api/auth";
+
+
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+// Initial Auth State -------------------------------------------
+const initAuth={
+  isAuthenticated:false,
+  userData:null,
+  token:null,
+  role:"public"
+}
+
+// Provider ------------------------------------------------------
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState(null);
+  const [auth, setAuth] = useState(initAuth);
   const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [studentId,setStudentId] = useState();
   const navigate = useNavigate();
 
+  // Initialize If already stored auth
   useEffect(() => {
     const storedAuth = localStorage.getItem("auth");
     if (storedAuth) {
@@ -22,16 +39,19 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
+  // Login
   const login = async (username, password, userType) => {
     setIsLoading(true);
     try { 
+      // Student -------------------------------------------
       if(userType==="student"){
         const res = await studentLogin({username,password});
         if(res?.token==null){
-          setAuth(null);
+          setAuth(initAuth);
           return;
         }
         const authData = {
+          isAuthenticated:true,
           userData: res,
           token: res?.token,
           role: "student",
@@ -40,15 +60,13 @@ export const AuthProvider = ({ children }) => {
         setAuth(authData);
         localStorage.setItem("auth", JSON.stringify(authData));
       }
+      // Admin ------------------------------------------------
       else if(userType==="admin"){
         const res = await loginAdmin({ username, password });
-        // if(res?.id==null){
-        //   setAuth(null);
-        //   return;
-        // }
         if(res){
           const authData = {
-            userData: res,
+            isAuthenticated:true,
+            userData: res.admin,
             token: res?.token,
             role: "admin",
           };
@@ -56,11 +74,13 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem("auth", JSON.stringify(authData));
         }
       }
+      // SuperAdmin ----------------------------------------------
       else if(userType==="superadmin"){
         const res = await loginSuperAdmin({ username, password });
         if(res){
           const authData = {
-            userData: res,
+            isAuthenticated:true,
+            userData: res.superAdmin,
             token: res?.token,
             role: "superadmin",
           };
@@ -68,78 +88,24 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem("auth", JSON.stringify(authData));
         }
       }
-      // ----------------- ADMIN --------------------
-      // if (ldapId === "admin" && password === "123") {
-      //   let authData = {
-      //     userData: { ldapId, name: "Admin User" },
-      //     token: "admin-token",
-      //     role: "admin",
-      //   };
-      //   setAuth(authData);
-      //   localStorage.setItem("auth", JSON.stringify(authData));
-      //   return;
-      // }
-
-      // ----------------- STUDENT -------------------
-
-      // const res = await studentLogin({username:ldapId,password});
-      // const authData = {
-      //   userData: res,
-      //   token: res.token,
-      //   role: "student",
-      // };
-      // setAuth(authData);
-      // localStorage.setItem("auth", JSON.stringify(authData));
-
-
-      // const response = await fetch(`${import.meta.env.VITE_SITE}/login`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ username:ldapId, password }),
-      // });
-
-      // const result = await response.json();
-      // let authData;
-      // if (response.ok) {
-      //     console.log(result)
-      //     authData = {
-      //       userData: converter(result.userData),
-      //       // token: result.token,
-      //       token:"hello",
-      //       role: "student",
-      //     };
-      //     setAuth(authData);
-      // } else {
-      //   throw new Error(result.error || "Authentication failed");
-      // }
-      // localStorage.setItem("auth", JSON.stringify(authData));
-
-      //MockAuth
-      // let authData;
-      // if (ldapId === "student" && password === "123") {
-      //   authData = {
-      //     userData: { ldapId, name: "Student User" },
-      //     token: "student-token",
-      //     role: "student",
-      //   };
-      // } else if (ldapId === "admin" && password === "123") {
-      //   authData = {
-      //     userData: { ldapId, name: "Admin User" },
-      //     token: "admin-token",
-      //     role: "admin",
-      //   };
-      // } else {
-      //   throw new Error("Authentication failed");
-      // }
-
-      // setAuth(authData);
-      // localStorage.setItem("auth", JSON.stringify(authData));
+      // Intermediate ---------------------------------------------
+      else if(userType==="intermediate"){
+        const res = await loginIntermediate({ username, password });
+        if (res) {
+          const authData = {
+            isAuthenticated: true,
+            userData: res.intermediate,
+            token: res?.token,
+            role: "intermediate",
+          };
+          setAuth(authData);
+          localStorage.setItem("auth", JSON.stringify(authData));
+        }
+      }
     }
     catch (error) {
       console.error("Login error:", error);
-      setAuth(null);
+      setAuth(initAuth);
       localStorage.removeItem("auth");
       localStorage.removeItem("token");
       throw error;
@@ -150,6 +116,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(()=>{
+    // Site token for student authorization
     const makeSiteToken=async()=>{
       setIsLoading(true);
       try {
@@ -164,21 +131,21 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    if(auth && auth?.role=="student"){
+    if((auth.isAuthenticated) && auth?.role==="student"){
       setStudentId(auth?.userData?.userInfo?.uid);
       makeSiteToken();
     }
   },[auth])
 
   const logout = () => {
-    setAuth(null);
+    setAuth(initAuth);
     localStorage.removeItem("auth");
     localStorage.removeItem("token");
     navigate("/");
   };
 
   useEffect(() => {
-    if (auth === null && !isLoading) {
+    if ((auth.isAuthenticated===false) && !isLoading) {
       navigate("/");
     }
   }, [auth, navigate, isLoading]);

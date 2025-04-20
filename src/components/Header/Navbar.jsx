@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
@@ -177,8 +177,8 @@ const Navbar = () => {
                   >
                     Admins
                   </NavLink>
-                  {/* <NavLink
-                    to="/superadmin/profile"
+                  <NavLink
+                    to="/superadmin/intermediates"
                     className={({ isActive }) =>
                       `${
                         isActive
@@ -187,8 +187,8 @@ const Navbar = () => {
                       }`
                     }
                   >
-                    Profile
-                  </NavLink> */}
+                    Intermediates
+                  </NavLink>
                 </div>
                 <div
                   className="cursor-pointer flex justify-center items-center"
@@ -201,7 +201,36 @@ const Navbar = () => {
                   <p className="max-s350:hidden">Logout</p>
                 </div>
               </div>
-            ) : null}
+            ) :
+            auth?.role === "intermediate" ? (
+              <div className="mb-3 rounded-lg px-5 max-sm:px-2 py-2 flex justify-between border-2 border-white">
+                <div className="flex gap-5 max-sm:gap-2">
+                  <NavLink
+                    to="/intermediate/complaints"
+                    className={({ isActive }) =>
+                      `${
+                        isActive
+                          ? "border-b-2 border-white"
+                          : "border-b-2 border-transparent"
+                      }`
+                    }
+                  >
+                    Complaints
+                  </NavLink>
+                </div>
+                <div
+                  className="cursor-pointer flex justify-center items-center"
+                  onClick={logout}
+                >
+                  <FontAwesomeIcon
+                    icon={faRightFromBracket}
+                    className="s350:pr-1"
+                  />
+                  <p className="max-s350:hidden">Logout</p>
+                </div>
+              </div>
+            ) 
+            : null}
           </div>
         </div>
       </div>

@@ -1,20 +1,30 @@
 import React from "react";
 import {Routes, Route,Navigate } from "react-router-dom";
-import Layout from "./Layout/Layout";
 
-import Home from "./pages/students/Home";
+// Global ----------------------------------------------------
+import Layout from "./Layout/Layout";
 import Login from "./pages/Login";
+import Loader from "./components/Loader";
+
+// Student Screens -------------------------------------------
+import Home from "./pages/students/Home";
 import Profile from "./pages/students/Profile";
 import Complaint from "./pages/students/Complaint";
 import ComplaintViewPage from "./pages/students/ComplaintViewPage";
 
+// Admin Screens ---------------------------------------------
 import AdminDashboard from "./pages/admins/AdminDashboard";
 import AdminManageComplaints from "./pages/admins/AdminManageComplaints";
 
+// Intermediate Screens --------------------------------------
+import IntermediateManageComplaints from "./pages/intermediate/IntermediateManageComplaints";
+
+// Superadmin Screens ----------------------------------------
 import SuperAdminProfile from "./pages/superAdmin/SuperAdminProfile";
 import AdminList from "./pages/superAdmin/AdminList";
+import IntermediateList from "./pages/superAdmin/IntermediateList";
 
-import Loader from "./components/Loader";
+// Context ----------------------------------------------------
 import { useAuth } from "./context/AuthContext";
 import { useData } from "./context/DataContext";
 
@@ -76,12 +86,30 @@ const App = () => {
           }
         />
 
+        {/* Intermediate Routes */}
+        <Route
+          path="/intermediate/complaints"
+          element={
+            <ProtectedRoute role="intermediate">
+              <IntermediateManageComplaints />
+            </ProtectedRoute>
+          }
+        />
+
         {/* SuperAdmin Routes */}
         <Route
           path="/superadmin/admins"
           element={
             <ProtectedRoute role="superadmin">
               <AdminList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superadmin/intermediates"
+          element={
+            <ProtectedRoute role="superadmin">
+              <IntermediateList />
             </ProtectedRoute>
           }
         />
@@ -101,7 +129,7 @@ const App = () => {
 
 const AuthenticatedRoute = () => {
   const { auth } = useAuth();
-  return !auth ? <Login /> : <RedirectBasedOnRole />;
+  return !auth.isAuthenticated ? <Login /> : <RedirectBasedOnRole />;
 };
 
 const CatchAllRoutes = () => {
@@ -118,13 +146,15 @@ const RedirectBasedOnRole = () => {
       </div>
     );
   }
-  if (!auth) return <Login />;
+  if (!auth.isAuthenticated) return <Login />;
   if (auth?.role === "student") {
     return <Navigate to="/student/home" replace />;
   } else if (auth?.role === "admin") {
     return <Navigate to="/admin/dashboard" replace />;
   } else if (auth?.role === "superadmin") {
     return <Navigate to="/superadmin/admins" replace />;
+  } else if (auth?.role === "intermediate") {
+    return <Navigate to="/intermediate/complaints" replace />;
   } else {
     logout();
     return <Login />;
@@ -142,7 +172,7 @@ const ProtectedRoute = ({ role, children }) => {
     );
   }
 
-  if (!auth || auth?.role !== role) {
+  if (!auth.isAuthenticated || auth?.role !== role) {
     logout();
     return <Login />;
   }

@@ -32,7 +32,7 @@ export default function ComplaintProcessVisualization() {
       description: "Student submits a complaint through the portal.",
       status: "Status: Open",
       icon: faEdit,
-      color: "bg-blue-500",
+      color: "bg-orange-500",
     },
     {
       id: 2,
@@ -40,7 +40,7 @@ export default function ComplaintProcessVisualization() {
       description: "Distributor assigns complaint to appropriate admin.",
       status: "Status: Assigned",
       icon: faUserTie,
-      color: "bg-yellow-500",
+      color: "bg-blue-500",
     },
     {
       id: 3,
@@ -48,7 +48,7 @@ export default function ComplaintProcessVisualization() {
       description: "Admin reviews and processes the complaint.",
       status: "Status: Processing",
       icon: faCog,
-      color: "bg-orange-500",
+      color: "bg-yellow-500",
     },
     {
       id: 4,

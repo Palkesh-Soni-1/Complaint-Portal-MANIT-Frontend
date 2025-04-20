@@ -1,59 +1,107 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useLocation,useNavigate } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 
 import Loader from "../../components/Loader";
 import { useAuth } from "../../context/AuthContext";
 import { useData } from "../../context/DataContext";
 
+import {
+  Check,
+  Clock,
+  AlertCircle,
+  UserCheck,
+  X,
+} from "lucide-react";
 
+import { fetchComplaintByComplaintNumber } from "../../services/api/complaint";
 
 function ComplaintViewPage() {
+  const { complaintNumber } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { auth } = useAuth();
+  const { info } = useData();
 
-    const { complaintNumber } = useParams();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { auth,studentId } = useAuth();
-    const { info } = useData();
+  // Getting complaint from location state
+  const [complaint, setComplaint] = useState(location.state?.complaint || null);
 
-    // Getting complaint from location state
-    const [complaint, setComplaint] = useState(
-      location.state?.complaint || null
+  const [loading, setLoading] = useState(!complaint);
+
+  useEffect(() => {
+    if (!complaint && auth.isAuthenticated && info?.studentId) {
+      fetchComplaintByComplaintNumber({
+        setLoading,
+        complaintNumber,
+        studentId: info?.studentId,
+        setComplaint,
+      });
+    }
+  }, [complaint, auth, info, complaintNumber]);
+
+  // Loader
+  if (loading)
+    return (
+      <div className="min-h-[70vh] flex justify-center items-center">
+        <Loader />
+      </div>
     );
 
-    const [loading, setLoading] = useState(!complaint);
-
-    useEffect(() => {
-      if (!complaint && auth && info?.studentId) {
-        setLoading(true);
-        const token = localStorage.getItem("site_token");
-        fetch(
-          `${
-            import.meta.env.VITE_SITE
-          }/complaint/getID?complaintNumber=${complaintNumber}&studentId=${studentId}`,
-          {
-            method:"GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-          .then((res) => res.json())
-          .then((json) => setComplaint(json.data))
-          .catch((error)=>console.log(error))
-          .finally(() => setLoading(false));
-      }
-    }, [complaint, auth, info, complaintNumber]);
-
-    if (loading) return <div className="min-h-[70vh] flex justify-center items-center"><Loader /></div>;
-
+  // date formatting
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // User (SIMON) GO-BACK
   const handleBackToList = () => {
     navigate(-1);
+  };
+
+  // Status badge component
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "resolved":
+        return (
+          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <Check size={14} />
+            <span className="xs:inline">Resolved</span>
+          </div>
+        );
+      case "open":
+        return (
+          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <AlertCircle size={14} />
+            <span className="xs:inline">Open</span>
+          </div>
+        );
+      case "processing":
+        return (
+          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <Clock size={14} />
+            <span className="xs:inline">Processing</span>
+          </div>
+        );
+      case "assigned":
+        return (
+          <div className="bg-blue-300 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <UserCheck size={14} />
+            <span className="xs:inline">Assigned</span>
+          </div>
+        );
+      case "rejected":
+        return (
+          <div className="bg-gray-300 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
+            <X size={14} />
+            <span className="xs:inline">Rejected</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-4">
+            {status}
+          </div>
+        );
+    }
   };
 
   if (!complaint) {
@@ -100,18 +148,7 @@ function ComplaintViewPage() {
             <span className="px-2 py-1 sm:px-3 sm:py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
               {complaint.complaintSubType}
             </span>
-            <span
-              className={`px-2 py-1 sm:px-3 sm:py-1 text-xs font-semibold rounded-full ${
-                complaint.status === "resolved"
-                  ? "bg-green-100 text-green-800"
-                  : complaint.status === "processing"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {complaint.status?.charAt(0)?.toUpperCase() +
-                complaint.status?.slice(1)}
-            </span>
+            {getStatusBadge(complaint.status)}
           </div>
         </div>
 
@@ -180,24 +217,24 @@ function ComplaintViewPage() {
             {complaint.status !== "open" ? (
               <div>
                 {complaint.processed && (
-                <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
-                  <dt className="text-xs sm:text-sm font-medium text-gray-500">
-                    Processing Feedback
-                  </dt>
-                  <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {complaint.processingFeedback}
-                  </dd>
-                </div>
-                )} 
+                  <div className="bg-gray-50 px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500">
+                      Processing Feedback
+                    </dt>
+                    <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                      {complaint.processingFeedback}
+                    </dd>
+                  </div>
+                )}
                 {complaint.resolved && (
-                <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
-                  <dt className="text-xs sm:text-sm font-medium text-gray-500">
-                    Resolving Feedback
-                  </dt>
-                  <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {complaint.resolvingFeedback}
-                  </dd>
-                </div>
+                  <div className="bg-white px-3 py-4 sm:px-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 ">
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500">
+                      Resolving Feedback
+                    </dt>
+                    <dd className="mt-1 text-xs sm:text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                      {complaint.resolvingFeedback}
+                    </dd>
+                  </div>
                 )}
               </div>
             ) : null}

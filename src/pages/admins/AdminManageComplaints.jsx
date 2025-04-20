@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import ComplaintsList from "../../components/ComplaintsList";
-import ComplaintDetail from "../../components/ComplaintDetail";
-import StatusUpdateModal from "../../components/StatusUpdateModal";
+import ComplaintsList from "../../components/Admin/ComplaintsList";
+import ComplaintDetail from "../../components/Admin/ComplaintDetail";
+import StatusUpdateModal from "../../components/Admin/StatusUpdateModal";
+import { fetchAssignedComplaints } from "../../services/api/complaint";
+
 import { useAuth } from "../../context/AuthContext";
 import Loader from "../../components/Loader";
 
 const AdminManageComplaints = () => {
-  const { complaints, setComplaints } = useAuth();
+  const { complaints, setComplaints, auth } = useAuth();
 
   const [activeView, setActiveView] = useState("list");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -38,7 +40,7 @@ const AdminManageComplaints = () => {
       setIsLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_SITE}/complaint/status`,
+        `${import.meta.env.VITE_SITE}/complaint/admin/status`,
         {
           method: "PATCH",
           headers: {
@@ -86,34 +88,12 @@ const AdminManageComplaints = () => {
   };
 
   useEffect(() => {
-    const fetchComplaints = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem("token");
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-        const response = await fetch(
-          `${import.meta.env.VITE_SITE}/complaint/get/all`,
-          {
-            method: "GET",
-            headers: headers,
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch complaints");
-        }
-        const data = await response.json();
-        setComplaints(data.data);
-      } catch (error) {
-        console.error("Error fetching complaints:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchComplaints();
+    fetchAssignedComplaints({
+      setIsLoading,
+      setComplaints,
+      adminId: auth?.userData?.id,
+    });
   }, []);
 
   return (

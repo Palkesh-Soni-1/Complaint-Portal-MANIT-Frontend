@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Header/Navbar";
 import Footer from "../components/Footer";
 import { scrollUp } from "../services/scrollUp";
 

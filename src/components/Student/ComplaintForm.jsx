@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { useData } from "../context/DataContext";
-import Loader from "./Loader";
-import { useAuth } from "../context/AuthContext";
+import { useData } from "../../context/DataContext";
+import Loader from "../Loader";
+import { useAuth } from "../../context/AuthContext";
+import { postComplaint } from "../../services/api/complaint";
 const ComplaintForm = () => {
-  const {studentId} =useAuth();
-  const {info}=useData();
-  const [isLoading,setIsLoading]=useState(false);
+  const { studentId } = useAuth();
+  const { info } = useData();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     studentId: info?.studentId,
     studentName: info?.fullName,
@@ -125,38 +126,18 @@ const ComplaintForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      try{
-        const token = localStorage.getItem("site_token");
-        const res = await fetch(`${import.meta.env.VITE_SITE}/complaint/post?studentId=${studentId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        });
-        if (res.ok) {
-          setIsLoading(false);
-          alert("Complaint Submitted Successfully");
-          // console.log(await res.json())
-        }
-      }
-      catch(error){
-        console.error("Error:", error)
-      }
-      finally{
-        setIsLoading(false);
-      }
+      postComplaint({
+        studentId,
+        formData,
+        setIsLoading,
+      });
     } else {
       setErrors(validationErrors);
     }
   };
 
-
-  
   return (
     <div className="p-8 bg-transparent max-w-[1100px] mx-auto">
       {isLoading ? (
