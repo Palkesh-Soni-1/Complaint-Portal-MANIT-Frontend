@@ -41,7 +41,7 @@ const LoginForm = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <select
-                className="w-full py-2 text-blue-500 bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-500 px-2"
+                className="w-full py-2 text-blue-500 bg-transparent border-b-2 border-blue-500 focus:outline-none focus:border-blue-500 px-2 cursor-pointer"
                 value={userType}
                 onChange={(e) => setUserType(e.target.value)}
               >
