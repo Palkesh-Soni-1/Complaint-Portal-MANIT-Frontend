@@ -242,11 +242,10 @@ export default function IntermediateManageComplaints() {
   };
 
   const handleReject = (complaint) => {
-    setSelectedComplaint(complaint);
     if (!window.confirm("Are you sure you want to reject this complaint?")) {
       return;
     }
-    rejectComplaint();
+    rejectComplaint({ complaint });
   };
 
   const closeAdminModal = () => {
@@ -299,7 +298,7 @@ export default function IntermediateManageComplaints() {
     }
   };
 
-  const rejectComplaint = async () => {
+  const rejectComplaint = async ({ complaint }) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -312,7 +311,7 @@ export default function IntermediateManageComplaints() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            complaintId: selectedComplaint._id,
+            complaintId: complaint._id,
             status: "rejected",
           }),
         }

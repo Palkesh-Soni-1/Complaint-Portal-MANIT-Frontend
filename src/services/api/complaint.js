@@ -90,9 +90,9 @@ export async function fetchComplaintsByStudentId({
   }
 }
 
-export async function fetchComplaintByComplaintNumber({
+export async function fetchComplaintByComplaintId({
   setLoading,
-  complaintNumber,
+  complaintId,
   studentId,
   setComplaint,
 }) {
@@ -101,7 +101,7 @@ export async function fetchComplaintByComplaintNumber({
   fetch(
     `${
       import.meta.env.VITE_SITE
-    }/complaint/getID?complaintNumber=${complaintNumber}&studentId=${studentId}`,
+    }/complaint/getById?complaintId=${complaintId}&studentId=${studentId}`,
     {
       method: "GET",
       headers: {

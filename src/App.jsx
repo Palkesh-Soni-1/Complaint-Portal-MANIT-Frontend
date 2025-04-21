@@ -60,7 +60,7 @@ const App = () => {
           }
         />
         <Route
-          path="/student/complaints/:complaintNumber"
+          path="/student/complaints/:complaintId"
           element={
             <ProtectedRoute role="student">
               <ComplaintViewPage />

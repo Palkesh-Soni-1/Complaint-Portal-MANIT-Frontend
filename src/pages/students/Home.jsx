@@ -348,8 +348,8 @@ function Home() {
                 <div className="sm:hidden">
                   {filteredComplaints.map((complaint, index) => (
                     <NavLink
-                      key={complaint.complaintNumber}
-                      to={`/student/complaints/${complaint.complaintNumber}`}
+                      key={complaint._id}
+                      to={`/student/complaints/${complaint._id}`}
                       state={{ complaint }}
                       className="border-b border-blue-100 p-3 hover:bg-blue-50"
                     >
@@ -374,8 +374,8 @@ function Home() {
                 <div className="hidden sm:block">
                   {filteredComplaints.map((complaint, index) => (
                     <NavLink
-                      key={complaint.complaintNumber}
-                      to={`/student/complaints/${complaint.complaintNumber}`}
+                      key={complaint._id}
+                      to={`/student/complaints/${complaint._id}`}
                       state={{ complaint }}
                       className="grid grid-cols-4 border-b border-blue-300 text-sm hover:bg-blue-50"
                     >

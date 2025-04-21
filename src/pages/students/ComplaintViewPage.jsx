@@ -13,10 +13,10 @@ import {
   X,
 } from "lucide-react";
 
-import { fetchComplaintByComplaintNumber } from "../../services/api/complaint";
+import { fetchComplaintByComplaintId } from "../../services/api/complaint";
 
 function ComplaintViewPage() {
-  const { complaintNumber } = useParams();
+  const { complaintId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
@@ -29,14 +29,14 @@ function ComplaintViewPage() {
 
   useEffect(() => {
     if (!complaint && auth.isAuthenticated && info?.studentId) {
-      fetchComplaintByComplaintNumber({
+      fetchComplaintByComplaintId({
         setLoading,
-        complaintNumber,
+        complaintId,
         studentId: info?.studentId,
         setComplaint,
       });
     }
-  }, [complaint, auth, info, complaintNumber]);
+  }, [complaint, auth, info, complaintId]);
 
   // Loader
   if (loading)
