@@ -1,8 +1,7 @@
-# React + Vite
+# Complaint Portal MANIT
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+The Complaint Portal provides students with an efficient platform to submit and track their complaints. This system streamlines the complaint handling process from submission to resolution through a structured workflow.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Complaint Resolution Process
+<img src="./public/image.png"/>
