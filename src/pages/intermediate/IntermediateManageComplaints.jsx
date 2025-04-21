@@ -321,7 +321,7 @@ export default function IntermediateManageComplaints() {
       // Update local state
       setComplaints((prevComplaints) =>
         prevComplaints.map((c) =>
-          c._id === selectedComplaint._id ? { ...c, status: "rejected" } : c
+          c._id === complaint._id ? { ...c, status: "rejected" } : c
         )
       );
     } catch (err) {
