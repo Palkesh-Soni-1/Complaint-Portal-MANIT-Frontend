@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
-import {
-  Search,
-  Filter,
-  ChevronRight,
-  UserCheck,
-  X,
-} from "lucide-react";
+import { Search, Filter, ChevronRight, UserCheck, X } from "lucide-react";
 import getStatusBadge from "../../components/getStatusBadge";
 import Loader from "../../components/Loader";
 import { useAuth } from "../../context/AuthContext";
+import {
+  getOpenComplaints,
+  assignComplaintToAdmin,
+  intermediateRejectComplaint,
+} from "../../services/api/complaint";
+import { getAllIntermediateAdmins } from "../../services/api/admindata";
+import { formatDate } from "../../utils";
+import {
+  filterAdminData,
+  filterIntermediateComplaints,
+} from "../../services/filters/intermediateFilters";
 
 export default function IntermediateManageComplaints() {
   const { logout } = useAuth();
@@ -51,84 +56,26 @@ export default function IntermediateManageComplaints() {
     "Ragging",
   ];
 
-  // Fetch all complaints -------------------------------------------
+  // Fetch all open complaints -------------------------------------------
   useEffect(() => {
-    const fetchComplaints = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-          `${import.meta.env.VITE_SITE}/complaint/get/open`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            logout();
-          }
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const res = await response.json();
-        // console.log(res);
-        setComplaints(res.data);
-        setFilteredComplaints(res.data);
-      } catch (err) {
-        setError(`Failed to fetch complaints: ${err.message}`);
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchComplaints();
+    getOpenComplaints({
+      setLoading,
+      setError,
+      logout,
+      setComplaints,
+      setFilteredComplaints,
+    });
   }, [logout, reload]);
 
-  // Apply filters to complaints -------------------------------------------
+  // Apply filters to complaints ------------------------------------------
   useEffect(() => {
-    const filtered = Array.isArray(complaints)
-      ? complaints.filter((complaint) => {
-          const matchesStatusFilter =
-            statusFilter === "all" || complaint.status === statusFilter;
-          const matchesTypeFilter =
-            typeFilter === "all" || complaint.complaintType === typeFilter;
-          const matchesSearch =
-            complaint.complaintNumber
-              ?.toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            complaint.description
-              ?.toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            complaint.studentName
-              ?.toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            complaint.studentId
-              ?.toLowerCase()
-              .includes(searchTerm.toLowerCase());
-
-          let matchesDateFilter = true;
-          if (dateFilter.startDate && dateFilter.endDate) {
-            const startDate = new Date(dateFilter.startDate);
-            const endDate = new Date(dateFilter.endDate);
-            const complaintDate = new Date(complaint.dateReported);
-            matchesDateFilter =
-              complaintDate >= startDate && complaintDate <= endDate;
-          }
-
-          return (
-            matchesStatusFilter &&
-            matchesTypeFilter &&
-            matchesSearch &&
-            matchesDateFilter
-          );
-        })
-      : [];
+    const filtered = filterIntermediateComplaints({
+      complaints,
+      statusFilter,
+      typeFilter,
+      dateFilter,
+      searchTerm,
+    });
 
     setFilteredComplaints(filtered);
   }, [
@@ -140,72 +87,16 @@ export default function IntermediateManageComplaints() {
     dateFilter.endDate,
   ]);
 
-  // Fetch admins when needed -----------------------------------------
-  const fetchAdmins = async () => {
-    try {
-      setAdminLoading(true);
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/intermediate/admins`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          logout();
-        }
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setAdmins(data);
-      setFilteredAdmins(data);
-
-      // Extract unique departments
-      const uniqueDepartments = [
-        ...new Set(data.map((admin) => admin.department)),
-      ];
-      setDepartments(uniqueDepartments);
-    } catch (err) {
-      setError(`Failed to fetch admins: ${err.message}`);
-      console.error(err);
-    } finally {
-      setAdminLoading(false);
-    }
-  };
-
   // Filter admins based on search and department --------------------------
   useEffect(() => {
     if (!admins.length) return;
 
-    let results = admins;
-
-    if (adminSearchTerm) {
-      const lowercasedSearch = adminSearchTerm.toLowerCase();
-      results = results.filter(
-        (admin) =>
-          admin.fullName.toLowerCase().includes(lowercasedSearch) ||
-          admin.username.toLowerCase().includes(lowercasedSearch) ||
-          admin.email?.toLowerCase().includes(lowercasedSearch) ||
-          admin.role?.toLowerCase().includes(lowercasedSearch)
-      );
-    }
-
-    if (adminFilterDepartment !== "all") {
-      results = results.filter(
-        (admin) => admin.department === adminFilterDepartment
-      );
-    }
-
-    // Only include active admins
-    results = results.filter((admin) => admin.isActive);
-
-    setFilteredAdmins(results);
+    filterAdminData({
+      admins,
+      adminSearchTerm,
+      adminFilterDepartment,
+      setFilteredAdmins,
+    });
   }, [admins, adminSearchTerm, adminFilterDepartment]);
 
   // Handler functions
@@ -233,7 +124,14 @@ export default function IntermediateManageComplaints() {
   const handleAssign = (complaint) => {
     setSelectedComplaint(complaint);
     setShowAdminModal(true);
-    fetchAdmins();
+    getAllIntermediateAdmins({
+      setAdminLoading,
+      logout,
+      setAdmins,
+      setFilteredAdmins,
+      setDepartments,
+      setError,
+    });
   };
 
   const handleReject = (complaint) => {
@@ -248,92 +146,26 @@ export default function IntermediateManageComplaints() {
     setAdminSearchTerm("");
     setAdminFilterDepartment("all");
   };
- 
-  // Assign complaint to Admin ----------------------------------------
+
+  // Assign complaint to Admin -------------------------------------
   const assignToAdmin = async (adminId) => {
-    try {
-      setAdminLoading(true);
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/complaint/intermediate/status`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            complaintId: selectedComplaint._id,
-            status: "assigned",
-            adminId: adminId,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-
-      // Update local state
-      setComplaints((prevComplaints) =>
-        prevComplaints.map((c) =>
-          c._id === selectedComplaint._id
-            ? { ...c, status: "assigned", assigned: true, assignedTo: adminId }
-            : c
-        )
-      );
-
-      closeAdminModal();
-      setReload(!reload);
-    } catch (err) {
-      setError(`Failed to assign complaint: ${err.message}`);
-      console.error(err);
-    } finally {
-      setAdminLoading(false);
-    }
+    await assignComplaintToAdmin({
+      setAdminLoading,
+      selectedComplaint,
+      adminId,
+      setComplaints,
+      closeAdminModal,
+      setReload,
+    });
   };
 
- // Rejection -----------------------------------------------------
+  // Rejection -----------------------------------------------------
   const rejectComplaint = async ({ complaint }) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/complaint/intermediate/status`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            complaintId: complaint._id,
-            status: "rejected",
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-
-      // Update local state
-      setComplaints((prevComplaints) =>
-        prevComplaints.map((c) =>
-          c._id === complaint._id ? { ...c, status: "rejected" } : c
-        )
-      );
-    } catch (err) {
-      setError(`Failed to reject complaint: ${err.message}`);
-      console.error(err);
-    }
-  };
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    await intermediateRejectComplaint({
+      complaint,
+      setComplaints,
+      setError,
+    });
   };
 
   if (loading) {
@@ -514,7 +346,8 @@ export default function IntermediateManageComplaints() {
               <div className="text-center py-8 text-gray-500">
                 No complaints match your filter criteria
               </div>
-            ) : ( Array.isArray(filteredComplaints) &&
+            ) : (
+              Array.isArray(filteredComplaints) &&
               filteredComplaints.map((complaint) => (
                 <div
                   key={complaint._id}
@@ -577,7 +410,8 @@ export default function IntermediateManageComplaints() {
               <div className="text-center py-8 text-gray-500">
                 No complaints match your filter criteria
               </div>
-            ) : (Array.isArray(filteredComplaints) &&
+            ) : (
+              Array.isArray(filteredComplaints) &&
               filteredComplaints.map((complaint) => (
                 <div
                   key={complaint._id}

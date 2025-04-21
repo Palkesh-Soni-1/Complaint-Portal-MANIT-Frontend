@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
-import {useAuth} from "../../context/AuthContext"
+import { useAuth } from "../../context/AuthContext";
+import { getAllSuperadminAdmins } from "../../services/api/admindata";
+import { filterSuperadminAdmin } from "../../services/filters/superadminFilters";
+import { addOrEditAdmin, deleteAdmin, toggleAdminActive } from "../../services/api/superadmin";
 function AdminList() {
-
-  const {logout}= useAuth();
+  const { logout } = useAuth();
 
   const [admins, setAdmins] = useState([]);
   const [filteredAdmins, setFilteredAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [reload,setReload] = useState(true);
+  const [reload, setReload] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -35,73 +37,26 @@ function AdminList() {
 
   useEffect(() => {
     const fetchAdmins = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-          `${import.meta.env.VITE_SITE}/superadmin/admins`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          if(response.status===401){
-            logout();
-          }
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setAdmins(data);
-        setFilteredAdmins(data);
-
-        const uniqueDepartments = [
-          ...new Set(data.map((admin) => admin.department)),
-        ];
-        setDepartments(uniqueDepartments);
-
-        setError(null);
-      } catch (err) {
-        setError(`Failed to fetch admins: ${err.message}`);
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      await getAllSuperadminAdmins({
+        setLoading,
+        setError,
+        setAdmins,
+        setFilteredAdmins,
+        setDepartments,
+      });
     };
 
     fetchAdmins();
   }, [reload]);
 
   useEffect(() => {
-    let results = admins;
-    if (searchTerm) {
-      const lowercasedSearch = searchTerm.toLowerCase();
-      results = results.filter(
-        (admin) =>
-          admin.fullName.toLowerCase().includes(lowercasedSearch) ||
-          admin.username.toLowerCase().includes(lowercasedSearch) ||
-          admin.email.toLowerCase().includes(lowercasedSearch) ||
-          admin.role.toLowerCase().includes(lowercasedSearch)
-      );
-    }
-
-    if (filterStatus !== "all") {
-      const isActive = filterStatus === "active";
-      results = results.filter((admin) => admin.isActive === isActive);
-    }
-
-    if (filterDepartment !== "all") {
-      results = results.filter(
-        (admin) => admin.department === filterDepartment
-      );
-    }
-
-    setFilteredAdmins(results);
+    filterSuperadminAdmin({
+      admins,
+      searchTerm,
+      filterStatus,
+      filterDepartment,
+      setFilteredAdmins,
+    });
   }, [searchTerm, filterStatus, filterDepartment, admins, reload]);
 
   const handleChange = (e) => {
@@ -165,74 +120,18 @@ function AdminList() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    const token = localStorage.getItem("token");
-    let url, method;
-
-    if (isEditing) {
-      url = `${import.meta.env.VITE_SITE}/superadmin/admins/${
-        currentAdmin._id
-      }`;
-      method = "PUT";
-    } else {
-      url = `${import.meta.env.VITE_SITE}/superadmin/admins`;
-      method = "POST";
-    }
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          logout();
-        }
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Error ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Update the admins list
-      if (isEditing) {
-        setAdmins((prevAdmins) =>
-          prevAdmins.map((admin) =>
-            admin._id === currentAdmin._id ? data : admin
-          )
-        );
-      } else {
-        setAdmins((prevAdmins) => [data.admin, ...prevAdmins]);
-        // To be removed (Temporary)
-        setReload(!reload);
-        if (
-          data.admin.department &&
-          !departments.includes(data.admin.department)
-        ) {
-          setDepartments([...departments, data.admin.department]);
-        }
-      }
-
-      // Close the form
-      setShowForm(false);
-      setFormData({
-        username: "",
-        password: "",
-        fullName: "",
-        role: "",
-        department: "",
-        email: "",
-        contactNumber: "",
-      });
-    } catch (err) {
-      setError(err.message);
-      console.error(err);
-    }
+    await addOrEditAdmin({
+      setError,
+      isEditing,
+      formData,
+      logout,
+      setAdmins,
+      setReload,
+      setDepartments,
+      departments,
+      setFormData,
+      setShowForm,
+    });
   };
 
   // Handle admin deletion
@@ -241,70 +140,17 @@ function AdminList() {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/superadmin/admins/${adminId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          logout();
-        }
-        throw new Error(`Error ${response.status}`);
-      }
-
-      // Remove admin from state
-      setAdmins((prevAdmins) =>
-        prevAdmins.filter((admin) => admin._id !== adminId)
-      );
-    } catch (err) {
-      setError(`Failed to delete admin: ${err.message}`);
-      console.error(err);
-    }
+    await deleteAdmin({ adminId, logout, setAdmins, setError });
   };
 
   // Toggle admin active status
   const handleToggleActive = async (admin) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/superadmin/admins/${admin._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            isActive: !admin.isActive,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          logout();
-        }
-        throw new Error(`Error ${response.status}`);
-      }
-
-      const updatedAdmin = await response.json();
-
-      // Update admin in state
-      setAdmins((prevAdmins) =>
-        prevAdmins.map((a) => (a._id === admin._id ? updatedAdmin : a))
-      );
-    } catch (err) {
-      setError(`Failed to update admin status: ${err.message}`);
-      console.error(err);
-    }
+    await toggleAdminActive({
+      admin,
+      logout,
+      setAdmins,
+      setError,
+    });
   };
 
   // Handle form close

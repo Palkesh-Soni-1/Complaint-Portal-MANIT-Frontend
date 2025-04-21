@@ -7,6 +7,8 @@ import {
   Square
 } from "lucide-react";
 import getStatusBadge from "../getStatusBadge";
+import { formatDate } from "../../utils";
+import { filterComplaintList } from "../../services/filters/adminFilters";
 
 function ComplaintsList({
   complaints,
@@ -22,6 +24,7 @@ function ComplaintsList({
     startDate: "",
     endDate: "",
   });
+
   // Selection state ----------------------------------------
   const [selectedComplaints, setSelectedComplaints] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -47,34 +50,12 @@ function ComplaintsList({
   ];
 
   // Filteration ---------------------------------------------
-  const filteredComplaints = complaints.filter((complaint) => {
-    const matchesStatusFilter =
-      statusFilter === "all" || complaint.status === statusFilter;
-    const matchesTypeFilter =
-      typeFilter === "all" || complaint.complaintType === typeFilter;
-    const matchesSearch =
-      complaint.complaintNumber
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      complaint.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.studentId?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    let matchesDateFilter = true;
-    if (dateFilter.startDate && dateFilter.endDate) {
-      const startDate = new Date(dateFilter.startDate);
-      const endDate = new Date(dateFilter.endDate);
-      const complaintDate = new Date(complaint.dateReported);
-      matchesDateFilter =
-        complaintDate >= startDate && complaintDate <= endDate;
-    }
-
-    return (
-      matchesStatusFilter &&
-      matchesTypeFilter &&
-      matchesSearch &&
-      matchesDateFilter
-    );
+  const filteredComplaints = filterComplaintList({
+    statusFilter,
+    complaints,
+    typeFilter,
+    dateFilter,
+    searchTerm
   });
 
   useEffect(() => {
@@ -154,12 +135,6 @@ function ComplaintsList({
       endDate: "",
     });
     setSearchTerm("");
-  };
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   const handleDateFilterChange = (field, value) => {

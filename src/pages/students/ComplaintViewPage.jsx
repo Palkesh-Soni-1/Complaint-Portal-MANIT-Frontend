@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 
 import Loader from "../../components/Loader";
+import { formatDate } from "../../utils";
 import { useAuth } from "../../context/AuthContext";
 import { useData } from "../../context/DataContext";
 
 import getStatusBadge from "../../components/getStatusBadge";
 import { fetchComplaintByComplaintId } from "../../services/api/complaint";
+
 
 function ComplaintViewPage() {
   const { complaintId } = useParams();
@@ -38,12 +40,6 @@ function ComplaintViewPage() {
         <Loader />
       </div>
     );
-
-  // date formatting
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
 
   // User (SIMON) GO-BACK
   const handleBackToList = () => {

@@ -6,10 +6,14 @@ import Loader from "../../components/Loader";
 import ComplaintsList from "../../components/Admin/ComplaintsList";
 import ComplaintDetail from "../../components/Admin/ComplaintDetail";
 import StatusUpdateModal from "../../components/Admin/StatusUpdateModal";
+import BulkStatusUpdateModal from "../../components/Admin/BulkStatusUpdateModal";
 
 // API Services --------------------------------------------------
 import { fetchAssignedComplaints } from "../../services/api/complaint";
-import BulkStatusUpdateModal from "../../components/Admin/BulkStatusUpdateModal";
+import { bulkUpdateComplaintStatus, updateComplaintStatus } from "../../services/api/admindata";
+
+// ##################################################################################
+
 
 const AdminManageComplaints = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -60,86 +64,26 @@ const AdminManageComplaints = () => {
   };
 
   const handleStatusUpdate = async (id, newStatus, feedback) => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/complaint/admin/status`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            complaintId: id,
-            status: newStatus,
-            feedback: feedback,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update status");
-      }
-
-      const updatedComplaint = await response.json();
-
-      // Update the local state with the new data
-      setComplaints((prevComplaints) =>
-        prevComplaints.map((complaint) =>
-          complaint._id === id ? updatedComplaint : complaint
-        )
-      );
-
-      if (selectedComplaintForDetails && selectedComplaintForDetails._id === id) {
-        setSelectedComplaintForDetails(updatedComplaint);
-      }
-
-      // Success message
-      alert(`Complaint status updated to ${newStatus}`);
-    } catch (error) {
-      console.error("Error updating complaint status:", error);
-      alert("Failed to update complaint status");
-    } finally {
-      setIsLoading(false);
-    }
+    await updateComplaintStatus({
+      setIsLoading,
+      id,
+      newStatus,
+      feedback,
+      setComplaints,
+      selectedComplaintForDetails,
+      setSelectedComplaintForDetails,
+    });
   };
 
   const handleBulkStatusUpdate = async (ids, newStatus, feedback) => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${import.meta.env.VITE_SITE}/complaint/admin/bulkStatus`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            complaintIds: ids,
-            status: newStatus,
-            feedback: feedback,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update status");
-      }
-
-      const updatedComplaint = await response.json();
-
-      alert(`Complaint status updated to ${newStatus}`);
-      setReload(!reload);
-    } catch (error) {
-      console.error("Error updating complaint status:", error);
-      alert("Failed to update complaint status");
-    } finally {
-      setIsLoading(false);
-    }
+    await bulkUpdateComplaintStatus({
+      setIsLoading,
+      ids,
+      newStatus,
+      feedback,
+      setReload,
+      reload
+    });
   };
 
   const handleBackToList = () => {

@@ -1,9 +1,6 @@
 import getStatusBadge from "../getStatusBadge";
+import { formatDate } from "../../utils";
 function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
 
   return (
     <div>

@@ -28,7 +28,11 @@ export async function fetchAllComplaints({ setIsLoading, setComplaints }) {
   }
 }
 
-export async function fetchAssignedComplaints({ setIsLoading, setComplaints, adminId }) {
+export async function fetchAssignedComplaints({
+  setIsLoading,
+  setComplaints,
+  adminId,
+}) {
   setIsLoading(true);
   try {
     const token = localStorage.getItem("token");
@@ -116,11 +120,7 @@ export async function fetchComplaintByComplaintId({
     .finally(() => setLoading(false));
 }
 
-export async function postComplaint({
-  studentId,
-  formData,
-  setIsLoading
-}) {
+export async function postComplaint({ studentId, formData, setIsLoading }) {
   try {
     setIsLoading(true);
     const token = localStorage.getItem("site_token");
@@ -144,5 +144,136 @@ export async function postComplaint({
     console.error("Error:", error);
   } finally {
     setIsLoading(false);
+  }
+}
+
+export async function getOpenComplaints({
+  setLoading,
+  setError,
+  logout,
+  setComplaints,
+  setFilteredComplaints,
+}) {
+  try {
+    setLoading(true);
+    setError(null);
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SITE}/complaint/get/open`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        logout();
+      }
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    const res = await response.json();
+    // console.log(res);
+    setComplaints(res.data);
+    setFilteredComplaints(res.data);
+  } catch (err) {
+    setError(`Failed to fetch complaints: ${err.message}`);
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+}
+
+
+export async function assignComplaintToAdmin({
+  setAdminLoading,
+  selectedComplaint,
+  adminId,
+  setComplaints,
+  closeAdminModal,
+  setReload,
+}) {
+  try {
+    setAdminLoading(true);
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SITE}/complaint/intermediate/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          complaintId: selectedComplaint._id,
+          status: "assigned",
+          adminId: adminId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    // Update local state
+    setComplaints((prevComplaints) =>
+      prevComplaints.map((c) =>
+        c._id === selectedComplaint._id
+          ? { ...c, status: "assigned", assigned: true, assignedTo: adminId }
+          : c
+      )
+    );
+
+    closeAdminModal();
+    setReload(!reload);
+  } catch (err) {
+    setError(`Failed to assign complaint: ${err.message}`);
+    console.error(err);
+  } finally {
+    setAdminLoading(false);
+  }
+}
+
+export async function intermediateRejectComplaint({
+  complaint,
+  setComplaints,
+  setError
+}){
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SITE}/complaint/intermediate/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          complaintId: complaint._id,
+          status: "rejected",
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    // Update local state
+    setComplaints((prevComplaints) =>
+      prevComplaints.map((c) =>
+        c._id === complaint._id ? { ...c, status: "rejected" } : c
+      )
+    );
+  } catch (err) {
+    setError(`Failed to reject complaint: ${err.message}`);
+    console.error(err);
   }
 }
