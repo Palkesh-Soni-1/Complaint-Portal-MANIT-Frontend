@@ -3,26 +3,24 @@ import {
   Search,
   Filter,
   ChevronRight,
-  Check,
-  Clock,
-  AlertCircle,
   UserCheck,
   X,
 } from "lucide-react";
+import getStatusBadge from "../../components/getStatusBadge";
 import Loader from "../../components/Loader";
 import { useAuth } from "../../context/AuthContext";
 
 export default function IntermediateManageComplaints() {
   const { logout } = useAuth();
 
-  // State management
+  // State management ---------------------------------------
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(false);
 
-  // Filters state
+  // Filters state ------------------------------------------
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -32,7 +30,7 @@ export default function IntermediateManageComplaints() {
     endDate: "",
   });
 
-  // Admin selection modal state
+  // Admin selection modal state ------------------------------
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [admins, setAdmins] = useState([]);
   const [filteredAdmins, setFilteredAdmins] = useState([]);
@@ -42,10 +40,7 @@ export default function IntermediateManageComplaints() {
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [adminLoading, setAdminLoading] = useState(false);
 
-  // Rejection modal state
-  const [rejectionFeedback, setRejectionFeedback] = useState("");
-
-  // Constants
+  // Constants -------------------------------------------------
   const complaintTypes = [
     "Academic",
     "Hostel",
@@ -56,7 +51,7 @@ export default function IntermediateManageComplaints() {
     "Ragging",
   ];
 
-  // Fetch all complaints
+  // Fetch all complaints -------------------------------------------
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
@@ -95,7 +90,7 @@ export default function IntermediateManageComplaints() {
     fetchComplaints();
   }, [logout, reload]);
 
-  // Apply filters to complaints
+  // Apply filters to complaints -------------------------------------------
   useEffect(() => {
     const filtered = Array.isArray(complaints)
       ? complaints.filter((complaint) => {
@@ -145,7 +140,7 @@ export default function IntermediateManageComplaints() {
     dateFilter.endDate,
   ]);
 
-  // Fetch admins when needed
+  // Fetch admins when needed -----------------------------------------
   const fetchAdmins = async () => {
     try {
       setAdminLoading(true);
@@ -184,7 +179,7 @@ export default function IntermediateManageComplaints() {
     }
   };
 
-  // Filter admins based on search and department
+  // Filter admins based on search and department --------------------------
   useEffect(() => {
     if (!admins.length) return;
 
@@ -253,7 +248,8 @@ export default function IntermediateManageComplaints() {
     setAdminSearchTerm("");
     setAdminFilterDepartment("all");
   };
-
+ 
+  // Assign complaint to Admin ----------------------------------------
   const assignToAdmin = async (adminId) => {
     try {
       setAdminLoading(true);
@@ -298,6 +294,7 @@ export default function IntermediateManageComplaints() {
     }
   };
 
+ // Rejection -----------------------------------------------------
   const rejectComplaint = async ({ complaint }) => {
     try {
       const token = localStorage.getItem("token");
@@ -337,53 +334,6 @@ export default function IntermediateManageComplaints() {
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
-  // Status badge component
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "resolved":
-        return (
-          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <Check size={14} />
-            <span className="xs:inline">Resolved</span>
-          </div>
-        );
-      case "open":
-        return (
-          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <AlertCircle size={14} />
-            <span className="xs:inline">Open</span>
-          </div>
-        );
-      case "processing":
-        return (
-          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <Clock size={14} />
-            <span className="xs:inline">Processing</span>
-          </div>
-        );
-      case "assigned":
-        return (
-          <div className="bg-blue-300 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <UserCheck size={14} />
-            <span className="xs:inline">Assigned</span>
-          </div>
-        );
-      case "rejected":
-        return (
-          <div className="bg-gray-300 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <X size={14} />
-            <span className="xs:inline">Rejected</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-4">
-            {status}
-          </div>
-        );
-    }
   };
 
   if (loading) {

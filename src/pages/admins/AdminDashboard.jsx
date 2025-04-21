@@ -11,6 +11,7 @@ import { NavLink } from "react-router-dom";
 import Loader from "../../components/Loader";
 import { useAuth } from "../../context/AuthContext";
 import { fetchAssignedComplaints } from "../../services/api/complaint";
+import getStatusBadge from "../../components/getStatusBadge";
 function AdminDashboard() {
   const { complaints, setComplaints, auth } = useAuth();
 
@@ -223,18 +224,7 @@ function AdminDashboard() {
                       <h4 className="font-medium text-gray-800">
                         {complaint.complaintNumber}
                       </h4>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          complaint.status === "resolved"
-                            ? "bg-green-100 text-green-800"
-                            : complaint.status === "processing"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {complaint.status.charAt(0).toUpperCase() +
-                          complaint.status.slice(1)}
-                      </span>
+                      {getStatusBadge(complaint.status)}
                     </div>
                     <div className="mt-1">
                       <p className="text-sm text-gray-600 truncate">

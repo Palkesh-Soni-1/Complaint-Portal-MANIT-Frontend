@@ -234,12 +234,12 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-      {isFixed && (
+      {/* {isFixed && (
         <div
           className="bg-blue-900"
           style={{ height: auth === null ? "50px" : "100px" }}
         ></div>
-      )}
+      )} */}
     </div>
   );
 };

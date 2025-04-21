@@ -2,14 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   Download,
   Search,
-  Check,
-  Clock,
-  AlertCircle,
   Calendar,
   Filter,
   ChevronRight,
-  UserCheck,
-  X,
 } from "lucide-react";
 import Loader from "../../components/Loader";
 import { NavLink } from "react-router-dom";
@@ -18,6 +13,8 @@ import { useData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
 
 import { fetchComplaintsByStudentId } from "../../services/api/complaint";
+import getStatusBadge from "../../components/getStatusBadge";
+import downloadAsCSV from "../../services/repository/downloadAsCsv";
 
 function Home() {
   const { auth } = useAuth();
@@ -109,81 +106,6 @@ function Home() {
     setSearchTerm("");
   };
 
-  // Status badge component
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "resolved":
-        return (
-          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <Check size={14} />
-            <span className="xs:inline">Resolved</span>
-          </div>
-        );
-      case "open":
-        return (
-          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <AlertCircle size={14} />
-            <span className="xs:inline">Open</span>
-          </div>
-        );
-      case "processing":
-        return (
-          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <Clock size={14} />
-            <span className="xs:inline">Processing</span>
-          </div>
-        );
-      case "assigned":
-        return (
-          <div className="bg-blue-300 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <UserCheck size={14} />
-            <span className="xs:inline">Assigned</span>
-          </div>
-        );
-      case "rejected":
-        return (
-          <div className="bg-gray-300 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <X size={14} />
-            <span className="xs:inline">Rejected</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-4">
-            {status}
-          </div>
-        );
-    }
-  };
-
-  const downloadAsCSV = () => {
-    const headers = ["Complaint No.", "Date", "Type", "Status"];
-    const csvContent = [
-      headers.join(","),
-      ...filteredComplaints.map((complaint) =>
-        [
-          complaint.complaintNumber,
-          complaint.dateReported,
-          complaint.complaintType,
-          complaint.status,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const navLink = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    navLink.setAttribute("href", url);
-    navLink.setAttribute(
-      "download",
-      `complaints_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    navLink.style.visibility = "hidden";
-    document.body.appendChild(navLink);
-    navLink.click();
-    document.body.removeChild(navLink);
-  };
-
   const toggleFilters = () => {
     setIsFilterOpen(!isFilterOpen);
   };
@@ -226,7 +148,7 @@ function Home() {
             </button>
             <button
               className="flex items-center justify-center gap-2 text-sm bg-white border border-gray-300 rounded-md px-3 py-2 hover:bg-gray-50"
-              onClick={downloadAsCSV}
+              onClick={()=>downloadAsCSV({filteredComplaints})}
             >
               <Download size={16} />
               <span className="hidden sm:inline">Export CSV</span>

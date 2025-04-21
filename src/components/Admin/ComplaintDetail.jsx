@@ -1,4 +1,4 @@
-
+import getStatusBadge from "../getStatusBadge";
 function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -41,19 +41,7 @@ function ComplaintDetail({ complaint, onBackToList, onStatusUpdate }) {
             <span className="px-2 py-1 sm:px-3 sm:py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
               {complaint.complaintSubType}
             </span>
-            <span
-              className={`px-2 py-1 sm:px-3 sm:py-1 text-xs font-semibold rounded-full 
-              ${
-                complaint.status === "resolved"
-                  ? "bg-green-100 text-green-800"
-                  : complaint.status === "processing"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {complaint.status.charAt(0).toUpperCase() +
-                complaint.status.slice(1)}
-            </span>
+            {getStatusBadge(complaint.status)}
           </div>
         </div>
 

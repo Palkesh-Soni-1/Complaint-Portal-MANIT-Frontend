@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import {
   Search,
   Filter,
   ChevronRight,
-  Check,
-  Clock,
-  AlertCircle,
-  UserCheck,
-  X,
+  CheckSquare,
+  Square
 } from "lucide-react";
+import getStatusBadge from "../getStatusBadge";
 
-function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
+function ComplaintsList({
+  complaints,
+  onSelectComplaintForView,
+  onStatusUpdate,
+  onBulkStatusUpdate,
+}) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -19,7 +22,20 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     startDate: "",
     endDate: "",
   });
+  // Selection state ----------------------------------------
+  const [selectedComplaints, setSelectedComplaints] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [lowestValidStatusType, setLowestValidStatusType] =
+    useState("assigned");
 
+  const statusOrder = {
+    assigned: 1,
+    processing: 2,
+    resolved: 3,
+    reopen: 4,
+  };
+
+  // Type of Complaints -------------------------------------
   const complaintTypes = [
     "Academic",
     "Hostel",
@@ -30,6 +46,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     "Ragging",
   ];
 
+  // Filteration ---------------------------------------------
   const filteredComplaints = complaints.filter((complaint) => {
     const matchesStatusFilter =
       statusFilter === "all" || complaint.status === statusFilter;
@@ -60,6 +77,71 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     );
   });
 
+  useEffect(() => {
+    if (selectedComplaints.length === 0) {
+      setLowestValidStatusType("assigned");
+      return;
+    }
+
+    // Find the selected complaint objects
+    const selectedComplaintObjects = complaints.filter((complaint) =>
+      selectedComplaints.includes(complaint._id)
+    );
+
+    // Determine the lowest status in the selection
+    let lowestStatus = "reopen"; // Start with highest status
+    let lowestOrder = statusOrder["reopen"]; // Start with highest order value
+
+    selectedComplaintObjects.forEach((complaint) => {
+      const currentStatus = complaint.status;
+      const currentOrder = statusOrder[currentStatus] || 999; // Default high if status not found
+
+      if (currentOrder < lowestOrder) {
+        lowestOrder = currentOrder;
+        lowestStatus = currentStatus;
+      }
+    });
+
+    setLowestValidStatusType(lowestStatus);
+  }, [selectedComplaints, complaints]);
+
+  // Selection of Complaint Rows -------------------------------
+
+  // Toggle select all
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedComplaints([]);
+    } else {
+      setSelectedComplaints(
+        filteredComplaints.map((complaint) => complaint._id)
+      );
+    }
+    setSelectAll(!selectAll);
+  };
+
+  // Toggle individual complaint selection
+  const handleSelectComplaint = (id) => {
+    if (selectedComplaints.includes(id)) {
+      setSelectedComplaints((prev) =>
+        prev.filter((complaintId) => complaintId !== id)
+      );
+      setSelectAll(false);
+    } else {
+      setSelectedComplaints((prev) => [...prev, id]);
+      // Check if all filtered complaints are now selected
+      if (selectedComplaints.length + 1 === filteredComplaints.length) {
+        setSelectAll(true);
+      }
+    }
+  };
+
+  // Handle bulk status update
+  const handleBulkStatusUpdate = (statusType) => {
+    onBulkStatusUpdate(selectedComplaints, statusType);
+    // setSelectedComplaints([]);
+    // setSelectAll(false);
+  };
+
   const toggleFilters = () => {
     setIsFilterOpen(!isFilterOpen);
   };
@@ -80,58 +162,22 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "resolved":
-        return (
-          <div className="bg-green-200 text-green-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <Check size={14} />
-            <span className="xs:inline">Resolved</span>
-          </div>
-        );
-      case "open":
-        return (
-          <div className="bg-red-500 text-white px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <AlertCircle size={14} />
-            <span className="xs:inline">Open</span>
-          </div>
-        );
-      case "processing":
-        return (
-          <div className="bg-yellow-300 text-yellow-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <Clock size={14} />
-            <span className="xs:inline">Processing</span>
-          </div>
-        );
-      case "assigned":
-        return (
-          <div className="bg-blue-300 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <UserCheck size={14} />
-            <span className="xs:inline">Assigned</span>
-          </div>
-        );
-      case "rejected":
-        return (
-          <div className="bg-gray-300 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1 text-xs md:text-sm md:px-4">
-            <X size={14} />
-            <span className="xs:inline">Rejected</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full whitespace-nowrap text-xs md:text-sm md:px-4">
-            {status}
-          </div>
-        );
-    }
-  };
-
   const handleDateFilterChange = (field, value) => {
     setDateFilter((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
+
+  // Determine if bulk actions should be enabled
+  const bulkActionsEnabled = selectedComplaints.length > 0;
+
+  // Determine which buttons should be enabled based on lowest status
+  const canMarkProcessing = lowestValidStatusType === "assigned";
+  const canMarkResolved =
+    lowestValidStatusType === "assigned" ||
+    lowestValidStatusType === "processing";
+  const canMarkReopen = lowestValidStatusType === "resolved";
 
   return (
     <div className="max-w-[1100px] mx-auto my-4 md:my-6">
@@ -284,8 +330,59 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
           </div>
         </div>
 
+        {/* Bulk Action Bar */}
+        <div
+          className={`bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between transition-all duration-300 ${
+            bulkActionsEnabled
+              ? "opacity-100"
+              : "opacity-0 h-0 p-0 overflow-hidden"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSelectAll}
+              className="flex items-center text-gray-700 hover:text-blue-600"
+            >
+              {selectAll ? (
+                <CheckSquare size={18} className="text-blue-600" />
+              ) : (
+                <Square size={18} />
+              )}
+              <span className="ml-2 text-sm font-medium">
+                {selectAll ? "Deselect All" : "Select All"}
+              </span>
+            </button>
+            <span className="text-sm text-gray-600 ml-4">
+              {selectedComplaints.length} selected
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleBulkStatusUpdate("processing")}
+              disabled={!bulkActionsEnabled || !canMarkProcessing}
+              className="text-xs bg-yellow-400 hover:bg-yellow-500 text-yellow-800 py-1 px-3 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Mark Processing
+            </button>
+            <button
+              onClick={() => handleBulkStatusUpdate("resolved")}
+              disabled={!bulkActionsEnabled || !canMarkResolved}
+              className="text-xs bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Mark Resolved
+            </button>
+            <button
+              onClick={() => handleBulkStatusUpdate("open")}
+              disabled={!bulkActionsEnabled || !canMarkReopen}
+              className="text-xs bg-orange-500 hover:bg-orange-600 text-white py-1 px-3 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Mark Open
+            </button>
+          </div>
+        </div>
+
         <div>
-          {/* Mobile View (from first code) */}
+          {/* Mobile View */}
           <div className="sm:hidden">
             {filteredComplaints.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -298,8 +395,20 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                   className="border-b border-blue-100 p-3 hover:bg-blue-50"
                 >
                   <div className="flex justify-between items-center mb-2">
-                    <div className="text-blue-600 font-medium">
-                      {complaint.complaintNumber}
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => handleSelectComplaint(complaint._id)}
+                        className="mr-2 flex-shrink-0"
+                      >
+                        {selectedComplaints.includes(complaint._id) ? (
+                          <CheckSquare size={18} className="text-blue-600" />
+                        ) : (
+                          <Square size={18} />
+                        )}
+                      </button>
+                      <div className="text-blue-600 font-medium">
+                        {complaint.complaintNumber}
+                      </div>
                     </div>
                     <div>{getStatusBadge(complaint.status)}</div>
                   </div>
@@ -307,7 +416,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                     <div className="text-gray-600">Student:</div>
                     <div>
                       <button
-                        onClick={() => onSelectComplaint(complaint._id)}
+                        onClick={() => onSelectComplaintForView(complaint._id)}
                         className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                       >
                         {complaint.studentName}
@@ -355,7 +464,7 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                     )}
 
                     <button
-                      onClick={() => onSelectComplaint(complaint._id)}
+                      onClick={() => onSelectComplaintForView(complaint._id)}
                       className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded"
                     >
                       View Details
@@ -366,14 +475,24 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
             )}
           </div>
 
-          {/* Desktop View (implementing the table from second code but with first code's structure) */}
+          {/* Desktop View */}
           <div className="hidden sm:block">
-            <div className="hidden md:grid md:grid-cols-5 border-t border-b border-blue-300 bg-white text-sm">
-              <div className="font-medium p-3 md:p-4">Complaint No.</div>
+            <div className="hidden md:grid md:grid-cols-6 border-t border-b border-blue-300 bg-white text-sm">
+              <div className="font-medium p-3 md:p-4 flex items-center">
+                <button onClick={handleSelectAll} className="mr-3">
+                  {selectAll ? (
+                    <CheckSquare size={18} className="text-blue-600" />
+                  ) : (
+                    <Square size={18} />
+                  )}
+                </button>
+                Complaint No.
+              </div>
               <div className="font-medium p-3 md:p-4">Student Details</div>
               <div className="font-medium p-3 md:p-4">Type</div>
               <div className="font-medium p-3 md:p-4">Date</div>
               <div className="font-medium p-3 md:p-4">Status</div>
+              <div className="font-medium p-3 md:p-4">Actions</div>
             </div>
 
             {filteredComplaints.length === 0 ? (
@@ -384,15 +503,25 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
               filteredComplaints.map((complaint) => (
                 <div
                   key={complaint._id}
-                  className="grid grid-cols-5 border-b border-blue-300 text-sm hover:bg-blue-50"
+                  className="grid grid-cols-6 border-b border-blue-300 text-sm hover:bg-blue-50"
                 >
-                  <div className="p-3 md:p-4 text-blue-600">
+                  <div className="p-3 md:p-4 text-blue-600 flex items-center">
+                    <button
+                      onClick={() => handleSelectComplaint(complaint._id)}
+                      className="mr-3 flex-shrink-0"
+                    >
+                      {selectedComplaints.includes(complaint._id) ? (
+                        <CheckSquare size={18} className="text-blue-600" />
+                      ) : (
+                        <Square size={18} />
+                      )}
+                    </button>
                     {complaint.complaintNumber}
                   </div>
                   <div className="p-3 md:p-4">
                     <div>
                       <button
-                        onClick={() => onSelectComplaint(complaint._id)}
+                        onClick={() => onSelectComplaintForView(complaint._id)}
                         className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                       >
                         {complaint.studentName}
@@ -420,57 +549,57 @@ function ComplaintsList({ complaints, onSelectComplaint, onStatusUpdate }) {
                   <div className="p-3 md:p-4 text-gray-600">
                     {formatDate(complaint.dateReported)}
                   </div>
-                  <div className="p-3 md:p-4 flex flex-col gap-2 relative">
+                  <div className="p-3 md:p-4">
                     <div>{getStatusBadge(complaint.status)}</div>
-                    <div className="flex space-x-2">
-                      <div className="relative group">
-                        <button className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-2 rounded">
-                          Update
-                        </button>
-                        <div className="absolute left-0 w-40 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
-                          {complaint.status === "assigned" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onStatusUpdate(complaint._id, "processing");
-                              }}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                            >
-                              Mark as Processing
-                            </button>
-                          )}
-                          {complaint.status !== "resolved" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onStatusUpdate(complaint._id, "resolved");
-                              }}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                            >
-                              Mark as Resolved
-                            </button>
-                          )}
-                          {complaint.status === "resolved" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onStatusUpdate(complaint._id, "open");
-                              }}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                            >
-                              Reopen Complaint
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => onSelectComplaint(complaint._id)}
-                        className="text-xs bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
-                      >
-                        View
+                  </div>
+                  <div className="p-3 md:p-4 flex gap-2">
+                    <div className="relative group">
+                      <button className="text-xs bg-teal-500 hover:bg-teal-600 text-gray-50 py-1 px-2 h-full rounded">
+                        Update
                       </button>
+                      <div className="absolute right-0 w-40 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                        {complaint.status === "assigned" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onStatusUpdate(complaint._id, "processing");
+                            }}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          >
+                            Mark as Processing
+                          </button>
+                        )}
+                        {complaint.status !== "resolved" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onStatusUpdate(complaint._id, "resolved");
+                            }}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          >
+                            Mark as Resolved
+                          </button>
+                        )}
+                        {complaint.status === "resolved" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onStatusUpdate(complaint._id, "open");
+                            }}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                          >
+                            Reopen Complaint
+                          </button>
+                        )}
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => onSelectComplaintForView(complaint._id)}
+                      className="text-xs bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded"
+                    >
+                      View
+                    </button>
                   </div>
                 </div>
               ))
