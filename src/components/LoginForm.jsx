@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import Loader from "./Loader";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginForm = () => {
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
+  const [isLoading,setIsLoading]=useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("student");
   const [error, setError] = useState("");
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+
+  const handleCaptchaChange = (value) => {
+    setCaptchaVerified(!!value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,14 +26,30 @@ const LoginForm = () => {
       return;
     }
 
-    try {
-      setError("");
-      await login(username, password, userType);
-    } catch (err) {
-      setError("Invalid credentials. Please try again.");
+    if (!captchaVerified) {
+      setError("Please verify the CAPTCHA");
       setTimeout(() => {
         setError("");
       }, 3000);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError("");
+      await login(username, password, userType);
+      // Reset captcha after successful login
+      setCaptchaVerified(false);
+    } catch (err) {
+      setError("Invalid credentials. Please try again.");
+      // Reset captcha after failed login
+      setCaptchaVerified(false);
+      setTimeout(() => {
+        setError("");
+      }, 3000);
+    }
+    finally{
+      setIsLoading(false);
     }
   };
 
@@ -70,12 +93,27 @@ const LoginForm = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+
+            {/* Google reCAPTCHA v2 */}
+            <div className="w-full flex justify-center mb-4">
+              <ReCAPTCHA
+                sitekey={`${import.meta.env.VITE_SITE_KEY}`}
+                onChange={handleCaptchaChange}
+              />
+            </div>
+
             <button
               type="submit"
-              className="w-full py-2 mt-4 text-white bg-blue-500 rounded-sm hover:bg-blue-600 font-semibold transition-all"
+              className={`w-full py-2 mt-4 text-white rounded-sm font-semibold transition-all ${
+                captchaVerified
+                  ? "bg-blue-500 hover:bg-blue-600"
+                  : "bg-blue-300 cursor-not-allowed"
+              }`}
+              disabled={!captchaVerified}
             >
               Login as {userType.charAt(0).toUpperCase() + userType.slice(1)}
             </button>
+
             {error ? (
               <div className="text-red-500 text-center mt-4">{error}</div>
             ) : (
