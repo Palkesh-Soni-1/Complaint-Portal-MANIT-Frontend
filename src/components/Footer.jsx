@@ -71,7 +71,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-2 mt-2 border-t border-gray-700 text-center text-sm">
+        <div className="pt-2 mt-2 border-t border-gray-50 text-center text-sm">
           <p>© 2024 All Rights Reserved | Terms of Use and Privacy Policy</p>
         </div>
       </div>
