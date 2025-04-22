@@ -307,7 +307,7 @@ function ComplaintsList({
 
         {/* Bulk Action Bar */}
         <div
-          className={`bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between transition-all max-sm:flex-col max-sm:gap-2 duration-300 overflow-x-scroll ${
+          className={`bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between transition-all max-sm:flex-col max-sm:gap-2 duration-300 ${
             bulkActionsEnabled
               ? "opacity-100"
               : "opacity-0 h-0 p-0 overflow-hidden"
