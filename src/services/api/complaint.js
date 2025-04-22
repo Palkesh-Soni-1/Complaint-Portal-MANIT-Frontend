@@ -195,6 +195,7 @@ export async function assignComplaintToAdmin({
   setComplaints,
   closeAdminModal,
   setReload,
+  reload
 }) {
   try {
     setAdminLoading(true);
@@ -230,6 +231,49 @@ export async function assignComplaintToAdmin({
     );
 
     closeAdminModal();
+    // setReload(!reload);
+  } catch (err) {
+    setError(`Failed to assign complaint: ${err.message}`);
+    console.error(err);
+  } finally {
+    setAdminLoading(false);
+  }
+}
+
+
+export async function bulkAssignComplaintsToAdmin({
+  setAdminLoading,
+  complaintIds,
+  adminId,
+  closeModal,
+  setReload,
+  reload,
+}) {
+  try {
+    setAdminLoading(true);
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SITE}/complaint/intermediate/bulkStatus`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          complaintIds,
+          status: "assigned",
+          adminId: adminId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    closeModal();
     setReload(!reload);
   } catch (err) {
     setError(`Failed to assign complaint: ${err.message}`);
@@ -272,6 +316,37 @@ export async function intermediateRejectComplaint({
         c._id === complaint._id ? { ...c, status: "rejected" } : c
       )
     );
+  } catch (err) {
+    setError(`Failed to reject complaint: ${err.message}`);
+    console.error(err);
+  }
+}
+
+export async function intermediateBulkRejectComplaints({
+  complaintIds,
+  setError
+}){
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SITE}/complaint/intermediate/bulkStatus`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          complaintIds,
+          status: "rejected",
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
   } catch (err) {
     setError(`Failed to reject complaint: ${err.message}`);
     console.error(err);

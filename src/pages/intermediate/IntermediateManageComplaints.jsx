@@ -1,19 +1,26 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, ChevronRight, UserCheck, X } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ChevronRight,
+  UserCheck,
+  X,
+  CheckSquare,
+  Square,
+  RefreshCw,
+} from "lucide-react";
 import getStatusBadge from "../../components/getStatusBadge";
 import Loader from "../../components/Loader";
+import AdminModal from "../../components/Intermediate/AdminModal";
 import { useAuth } from "../../context/AuthContext";
 import {
   getOpenComplaints,
-  assignComplaintToAdmin,
   intermediateRejectComplaint,
+  intermediateBulkRejectComplaints,
 } from "../../services/api/complaint";
-import { getAllIntermediateAdmins } from "../../services/api/admindata";
 import { formatDate } from "../../utils";
-import {
-  filterAdminData,
-  filterIntermediateComplaints,
-} from "../../services/filters/intermediateFilters";
+import { filterIntermediateComplaints } from "../../services/filters/intermediateFilters";
+import BulkAdminModal from "../../components/Intermediate/BulkAdminModal";
 
 export default function IntermediateManageComplaints() {
   const { logout } = useAuth();
@@ -24,6 +31,11 @@ export default function IntermediateManageComplaints() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reload, setReload] = useState(false);
+
+  // Bulk selection state ---------------------------------
+  const [selectedComplaints, setSelectedComplaints] = useState([]);
+  const [bulkActionInProgress, setBulkActionInProgress] = useState(false);
+  const [showBulkAssignModal, setShowBulkAssignModal] = useState(false);
 
   // Filters state ------------------------------------------
   const [statusFilter, setStatusFilter] = useState("all");
@@ -37,15 +49,9 @@ export default function IntermediateManageComplaints() {
 
   // Admin selection modal state ------------------------------
   const [showAdminModal, setShowAdminModal] = useState(false);
-  const [admins, setAdmins] = useState([]);
-  const [filteredAdmins, setFilteredAdmins] = useState([]);
-  const [adminSearchTerm, setAdminSearchTerm] = useState("");
-  const [adminFilterDepartment, setAdminFilterDepartment] = useState("all");
-  const [departments, setDepartments] = useState([]);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
-  const [adminLoading, setAdminLoading] = useState(false);
 
-  // Constants -------------------------------------------------
+  // Constants ------------------------------------------------
   const complaintTypes = [
     "Academic",
     "Hostel",
@@ -78,6 +84,8 @@ export default function IntermediateManageComplaints() {
     });
 
     setFilteredComplaints(filtered);
+    // Clear selection when filters change
+    setSelectedComplaints([]);
   }, [
     complaints,
     statusFilter,
@@ -86,18 +94,6 @@ export default function IntermediateManageComplaints() {
     dateFilter.startDate,
     dateFilter.endDate,
   ]);
-
-  // Filter admins based on search and department --------------------------
-  useEffect(() => {
-    if (!admins.length) return;
-
-    filterAdminData({
-      admins,
-      adminSearchTerm,
-      adminFilterDepartment,
-      setFilteredAdmins,
-    });
-  }, [admins, adminSearchTerm, adminFilterDepartment]);
 
   // Handler functions
   const toggleFilters = () => {
@@ -124,14 +120,6 @@ export default function IntermediateManageComplaints() {
   const handleAssign = (complaint) => {
     setSelectedComplaint(complaint);
     setShowAdminModal(true);
-    getAllIntermediateAdmins({
-      setAdminLoading,
-      logout,
-      setAdmins,
-      setFilteredAdmins,
-      setDepartments,
-      setError,
-    });
   };
 
   const handleReject = (complaint) => {
@@ -143,20 +131,7 @@ export default function IntermediateManageComplaints() {
 
   const closeAdminModal = () => {
     setShowAdminModal(false);
-    setAdminSearchTerm("");
-    setAdminFilterDepartment("all");
-  };
-
-  // Assign complaint to Admin -------------------------------------
-  const assignToAdmin = async (adminId) => {
-    await assignComplaintToAdmin({
-      setAdminLoading,
-      selectedComplaint,
-      adminId,
-      setComplaints,
-      closeAdminModal,
-      setReload,
-    });
+    setSelectedComplaint(null);
   };
 
   // Rejection -----------------------------------------------------
@@ -168,6 +143,86 @@ export default function IntermediateManageComplaints() {
     });
   };
 
+  // Bulk selection handlers -------------------------------------
+  const toggleSelectComplaint = (complaintId) => {
+    setSelectedComplaints((prev) => {
+      if (prev.includes(complaintId)) {
+        return prev.filter((id) => id !== complaintId);
+      } else {
+        return [...prev, complaintId];
+      }
+    });
+  };
+
+  const selectAllComplaints = () => {
+    // Only select complaints that are in the "open" status
+    const openComplaints = filteredComplaints
+      .filter((complaint) => complaint.status === "open")
+      .map((complaint) => complaint._id);
+
+    if (selectedComplaints.length === openComplaints.length) {
+      // If all are selected, deselect all
+      setSelectedComplaints([]);
+    } else {
+      // Otherwise select all open complaints
+      setSelectedComplaints(openComplaints);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedComplaints.length === 0) {
+      setError("No complaints selected");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Are you sure you want to reject ${selectedComplaints.length} selected complaints?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setBulkActionInProgress(true);
+      await intermediateBulkRejectComplaints({
+        complaintIds: selectedComplaints,
+        action: "reject",
+        setError
+      });
+
+      // Refresh complaints after bulk action
+      setReload((prev) => !prev);
+      setSelectedComplaints([]);
+    } catch (error) {
+      setError("Failed to process bulk action. Please try again.");
+    } finally {
+      setBulkActionInProgress(false);
+    }
+  };
+
+  const handleBulkAssign = () => {
+    if (selectedComplaints.length === 0) {
+      setError("No complaints selected");
+      return;
+    }
+    setShowBulkAssignModal(true);
+  };
+
+  const closeBulkAssignModal = () => {
+    setShowBulkAssignModal(false);
+  };
+
+  const isAllSelected = () => {
+    const openComplaints = filteredComplaints
+      .filter((c) => c.status === "open")
+      .map((c) => c._id);
+    return (
+      openComplaints.length > 0 &&
+      openComplaints.every((id) => selectedComplaints.includes(id))
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -177,7 +232,7 @@ export default function IntermediateManageComplaints() {
   }
 
   return (
-    <div className="max-w-[1100px] mx-auto my-4 md:my-6">
+    <div className="max-w-[1100px] mx-auto my-4 md:my-6 max-sm:px-2">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 md:p-4 rounded-t-lg">
         <h2 className="text-lg md:text-xl text-center md:text-left font-bold text-gray-100">
           Manage Complaints
@@ -243,8 +298,6 @@ export default function IntermediateManageComplaints() {
                     <option value="all">All Status</option>
                     <option value="open">Open</option>
                     <option value="assigned">Assigned</option>
-                    <option value="processing">Processing</option>
-                    <option value="resolved">Resolved</option>
                     <option value="rejected">Rejected</option>
                   </select>
                 </div>
@@ -335,8 +388,65 @@ export default function IntermediateManageComplaints() {
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
             <p>{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="underline text-sm mt-1"
+            >
+              Dismiss
+            </button>
           </div>
         )}
+
+        {/* Bulk Actions Bar */}
+        <div className="p-3 bg-gray-50 border-b border-gray-200">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center">
+              <button
+                onClick={selectAllComplaints}
+                className="flex items-center text-sm text-gray-700 hover:text-blue-600 mr-2"
+              >
+                {isAllSelected() ? (
+                  <CheckSquare size={16} className="mr-1 text-blue-500" />
+                ) : (
+                  <Square size={16} className="mr-1" />
+                )}
+                <span>Select All</span>
+              </button>
+              {selectedComplaints.length > 0 && (
+                <span className="text-sm text-gray-600">
+                  {selectedComplaints.length} selected
+                </span>
+              )}
+            </div>
+
+            {selectedComplaints.length > 0 && (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleBulkAssign}
+                  disabled={bulkActionInProgress}
+                  className="text-xs bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-1 px-3 rounded flex items-center gap-1"
+                >
+                  <UserCheck size={14} />
+                  Bulk Assign
+                </button>
+                <button
+                  onClick={handleBulkReject}
+                  disabled={bulkActionInProgress}
+                  className="text-xs bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white py-1 px-3 rounded flex items-center gap-1"
+                >
+                  <X size={14} />
+                  Bulk Reject
+                </button>
+                {bulkActionInProgress && (
+                  <span className="flex items-center text-sm text-gray-600">
+                    <RefreshCw size={14} className="animate-spin mr-1" />
+                    Processing...
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Complaints List */}
         <div>
@@ -354,6 +464,18 @@ export default function IntermediateManageComplaints() {
                   className="border-b border-blue-100 p-3 hover:bg-blue-50"
                 >
                   <div className="flex justify-between items-center mb-2">
+                    {complaint.status === "open" && (
+                      <div
+                        onClick={() => toggleSelectComplaint(complaint._id)}
+                        className="mr-2 cursor-pointer"
+                      >
+                        {selectedComplaints.includes(complaint._id) ? (
+                          <CheckSquare size={18} className="text-blue-500" />
+                        ) : (
+                          <Square size={18} className="text-gray-400" />
+                        )}
+                      </div>
+                    )}
                     <div className="text-blue-600 font-medium">
                       {complaint.complaintNumber}
                     </div>
@@ -397,7 +519,19 @@ export default function IntermediateManageComplaints() {
 
           {/* Desktop View */}
           <div className="hidden sm:block">
-            <div className="hidden md:grid md:grid-cols-6 border-t border-b border-blue-300 bg-white text-sm">
+            <div className="hidden md:grid md:grid-cols-[60px_1fr_1fr_1fr_1fr_1fr_1fr] border-t border-b border-blue-300 bg-white text-sm">
+              <div className="font-medium p-2 pl-4 flex items-center">
+                <button
+                  onClick={selectAllComplaints}
+                  className="mr-2 focus:outline-none"
+                >
+                  {isAllSelected() ? (
+                    <CheckSquare size={16} className="text-blue-500" />
+                  ) : (
+                    <Square size={16} />
+                  )}
+                </button>
+              </div>
               <div className="font-medium p-3 md:p-4">Complaint No.</div>
               <div className="font-medium p-3 md:p-4">Student Details</div>
               <div className="font-medium p-3 md:p-4">Type</div>
@@ -415,8 +549,24 @@ export default function IntermediateManageComplaints() {
               filteredComplaints.map((complaint) => (
                 <div
                   key={complaint._id}
-                  className="grid grid-cols-6 border-b border-blue-300 text-sm hover:bg-blue-50"
+                  className="grid grid-cols-[60px_1fr_1fr_1fr_1fr_1fr_1fr] border-b border-blue-300 text-sm hover:bg-blue-50"
                 >
+                  <div className="p-2 pl-4 flex items-center">
+                    {complaint.status === "open" ? (
+                      <button
+                        onClick={() => toggleSelectComplaint(complaint._id)}
+                        className="focus:outline-none"
+                      >
+                        {selectedComplaints.includes(complaint._id) ? (
+                          <CheckSquare size={16} className="text-blue-500" />
+                        ) : (
+                          <Square size={16} />
+                        )}
+                      </button>
+                    ) : (
+                      <span className="text-gray-300">―</span>
+                    )}
+                  </div>
                   <div className="p-3 md:p-4 text-blue-600">
                     {complaint.complaintNumber}
                   </div>
@@ -496,161 +646,29 @@ export default function IntermediateManageComplaints() {
           </div>
         </div>
       </div>
-      {showAdminModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl">
-            <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4">
-              <h3 className="text-xl font-semibold">Assign to Administrator</h3>
-              <button
-                onClick={closeAdminModal}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
 
-            <div className="p-6">
-              {/* Complaint info */}
-              <div className="mb-6 p-4 bg-blue-50 rounded-md">
-                <h4 className="font-medium mb-2">Complaint Details</h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <div className="text-gray-600">Number:</div>
-                  <div>{selectedComplaint?.complaintNumber}</div>
-                  <div className="text-gray-600">Student:</div>
-                  <div>{selectedComplaint?.studentName}</div>
-                  <div className="text-gray-600">Type:</div>
-                  <div>{selectedComplaint?.complaintType}</div>
-                </div>
-              </div>
+      {/* Admin Modal Component for single complaint */}
+      <AdminModal
+        showModal={showAdminModal}
+        closeModal={closeAdminModal}
+        selectedComplaint={selectedComplaint}
+        setComplaints={setComplaints}
+        setReload={setReload}
+        logout={logout}
+        reload={reload}
+      />
 
-              {/* Admin search filters */}
-              <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                <div className="relative w-full sm:w-2/3">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={18} className="text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={adminSearchTerm}
-                    onChange={(e) => setAdminSearchTerm(e.target.value)}
-                    placeholder="Search admins..."
-                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div className="flex items-center gap-2 w-full sm:w-1/3">
-                  <label className="text-sm text-gray-600">Department:</label>
-                  <select
-                    value={adminFilterDepartment}
-                    onChange={(e) => setAdminFilterDepartment(e.target.value)}
-                    className="border border-gray-300 rounded-md px-2 py-2 text-sm w-full"
-                  >
-                    <option value="all">All Departments</option>
-                    {departments.map((dept, index) => (
-                      <option key={index} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Admins list */}
-              {adminLoading ? (
-                <div className="flex justify-center p-8">
-                  <Loader />
-                </div>
-              ) : (
-                <div className="overflow-y-auto max-h-96 border border-gray-200 rounded-md">
-                  {filteredAdmins.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      No administrators match your search criteria
-                    </div>
-                  ) : (
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Role
-                          </th>
-                          <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Department
-                          </th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredAdmins.map((admin) => (
-                          <tr key={admin._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                  {admin.fullName.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {admin.fullName}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {admin.email || admin.username}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {admin.role || "Administrator"}
-                              </div>
-                            </td>
-                            <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {admin.department}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <button
-                                onClick={() => assignToAdmin(admin._id)}
-                                className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors"
-                                disabled={adminLoading}
-                              >
-                                Assign
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="bg-gray-50 px-6 py-4 flex justify-end rounded-b-lg">
-              <button
-                onClick={closeAdminModal}
-                className="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors mr-2"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Bulk Admin Modal Component */}
+      {showBulkAssignModal && (
+        <BulkAdminModal
+          showModal={showBulkAssignModal}
+          closeModal={closeBulkAssignModal}
+          selectedComplaintIds={selectedComplaints}
+          setReload={setReload}
+          reload={reload}
+          setBulkActionInProgress={setBulkActionInProgress}
+          logout={logout}
+        />
       )}
     </div>
   );
