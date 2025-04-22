@@ -28,7 +28,7 @@ function ComplaintsList({
   // Selection state ----------------------------------------
   const [selectedComplaints, setSelectedComplaints] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [lowestValidStatusType, setLowestValidStatusType] =
+  const [highestValidStatusType, setHighestValidStatusType] =
     useState("assigned");
 
   const statusOrder = {
@@ -60,7 +60,7 @@ function ComplaintsList({
 
   useEffect(() => {
     if (selectedComplaints.length === 0) {
-      setLowestValidStatusType("assigned");
+      setHighestValidStatusType("assigned");
       return;
     }
 
@@ -69,21 +69,21 @@ function ComplaintsList({
       selectedComplaints.includes(complaint._id)
     );
 
-    // Determine the lowest status in the selection
-    let lowestStatus = "reopen"; // Start with highest status
-    let lowestOrder = statusOrder["reopen"]; // Start with highest order value
+    // Determine the highest status in the selection
+    let highestStatus = "assigned"; // Start with lowest status
+    let highestOrder = statusOrder["assigned"]; // Start with lowest order value
 
     selectedComplaintObjects.forEach((complaint) => {
       const currentStatus = complaint.status;
-      const currentOrder = statusOrder[currentStatus] || 999; // Default high if status not found
+      const currentOrder = statusOrder[currentStatus] || -1; // Default low if status not found
 
-      if (currentOrder < lowestOrder) {
-        lowestOrder = currentOrder;
-        lowestStatus = currentStatus;
+      if (currentOrder > highestOrder) {
+        highestOrder = currentOrder;
+        highestStatus = currentStatus;
       }
     });
 
-    setLowestValidStatusType(lowestStatus);
+    setHighestValidStatusType(highestStatus);
   }, [selectedComplaints, complaints]);
 
   // Selection of Complaint Rows -------------------------------
@@ -147,15 +147,15 @@ function ComplaintsList({
   // Determine if bulk actions should be enabled
   const bulkActionsEnabled = selectedComplaints.length > 0;
 
-  // Determine which buttons should be enabled based on lowest status
-  const canMarkProcessing = lowestValidStatusType === "assigned";
+  // Determine which buttons should be enabled based on highest status
+  const canMarkProcessing = highestValidStatusType === "assigned";
   const canMarkResolved =
-    lowestValidStatusType === "assigned" ||
-    lowestValidStatusType === "processing";
-  const canMarkReopen = lowestValidStatusType === "resolved";
+    highestValidStatusType === "assigned" ||
+    highestValidStatusType === "processing";
+  const canMarkReopen = true;
 
   return (
-    <div className="max-w-[1100px] mx-auto my-4 md:my-6">
+    <div className="max-w-[1200px] mx-auto my-4 md:my-6">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 md:p-4 rounded-t-lg">
         <h2 className="text-lg md:text-xl text-center md:text-left font-bold text-gray-100">
           All Complaints
@@ -307,7 +307,7 @@ function ComplaintsList({
 
         {/* Bulk Action Bar */}
         <div
-          className={`bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between transition-all duration-300 ${
+          className={`bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between transition-all max-sm:flex-col max-sm:gap-2 duration-300 overflow-x-scroll ${
             bulkActionsEnabled
               ? "opacity-100"
               : "opacity-0 h-0 p-0 overflow-hidden"
@@ -327,7 +327,7 @@ function ComplaintsList({
                 {selectAll ? "Deselect All" : "Select All"}
               </span>
             </button>
-            <span className="text-sm text-gray-600 ml-4">
+            <span className="text-sm text-gray-600 ml-4 mr-2 text-center">
               {selectedComplaints.length} selected
             </span>
           </div>

@@ -10,7 +10,7 @@ import {
 const Footer = () => {
   return (
     <footer className="bg-[#003366] text-white pt-8 pb-2 text-sm">
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1200px] mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start gap-3 md:items-center">
           <div className="flex-grow">
             <h2 className="text-lg font-semibold mb-2">CONTACT</h2>
@@ -39,35 +39,42 @@ const Footer = () => {
               </a>
             </p>
           </div>
-          <div className="flex justify-center items-center text-center max-sm:w-full flex-shrink space-x-4 mt-4 md:mt-0">
-            <a
-              href="https://www.facebook.com/people/MANIT-Bhopal/100057525636119/"
-              target="_blank"
-              className="text-blue-500 text-lg  hover:text-blue-600"
-            >
-              <FontAwesomeIcon icon={faFacebookF} />
-            </a>
-            <a
-              href="https://www.youtube.com/channel/UCXzZC99puUZuJDiQ09p72cw"
-              target="_blank"
-              className="text-red-500  text-lg hover:text-red-600"
-            >
-              <FontAwesomeIcon icon={faYoutube} />
-            </a>
-            <a
-              href="https://twitter.com/manitbpl"
-              target="_blank"
-              className="text-blue-500 text-lg  hover:text-blue-600"
-            >
-              <FontAwesomeIcon icon={faTwitter} />
-            </a>
-            <a
-              href="https://www.instagram.com/manitbhopl/"
-              target="_blank"
-              className="text-red-500  text-lg hover:text-red-600"
-            >
-              <FontAwesomeIcon icon={faInstagram} />
-            </a>
+          <div>
+            <div className="flex justify-start md:justify-center items-center text-center max-sm:w-full flex-shrink space-x-4 mt-4 md:mt-0">
+              <a
+                href="https://www.facebook.com/people/MANIT-Bhopal/100057525636119/"
+                target="_blank"
+                className="text-blue-500 text-lg  hover:text-blue-600"
+              >
+                <FontAwesomeIcon icon={faFacebookF} />
+              </a>
+              <a
+                href="https://www.youtube.com/channel/UCXzZC99puUZuJDiQ09p72cw"
+                target="_blank"
+                className="text-red-500  text-lg hover:text-red-600"
+              >
+                <FontAwesomeIcon icon={faYoutube} />
+              </a>
+              <a
+                href="https://twitter.com/manitbpl"
+                target="_blank"
+                className="text-blue-500 text-lg  hover:text-blue-600"
+              >
+                <FontAwesomeIcon icon={faTwitter} />
+              </a>
+              <a
+                href="https://www.instagram.com/manitbhopl/"
+                target="_blank"
+                className="text-red-500  text-lg hover:text-red-600"
+              >
+                <FontAwesomeIcon icon={faInstagram} />
+              </a>
+            </div>
+            <div className="text-left md:text-center">
+              Contributions:-
+              <br />
+              Satyam Gupta | Palkesh Soni
+            </div>
           </div>
         </div>
 

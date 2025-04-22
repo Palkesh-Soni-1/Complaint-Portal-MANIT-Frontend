@@ -55,7 +55,7 @@ function ComplaintViewPage() {
   }
 
   return (
-    <div className="max-w-[1100px] mx-auto min-h-[70vh] py-5 px-2">
+    <div className="max-w-[1200px] mx-auto min-h-[70vh] py-5 px-2">
       <button
         onClick={handleBackToList}
         className="flex items-center text-gray-100 hover:text-gray-300 mb-6"

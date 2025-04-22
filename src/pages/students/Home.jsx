@@ -111,7 +111,7 @@ function Home() {
   };
 
   return (
-    <div className="max-w-[1100px] mx-auto my-4 md:my-10 px-2 font-sans min-h-screen rounded-lg md:rounded-xl">
+    <div className="max-w-[1200px] mx-auto my-4 md:my-10 px-2 font-sans min-h-screen rounded-lg md:rounded-xl">
       <div className="overflow-hidden">
         <div className="bg-gradient-to-r rounded-lg from-blue-500 to-blue-600 p-3 md:p-4 border-b border-blue-300 flex justify-between items-center">
           <h1 className="text-base md:text-lg font-bold text-blue-100">

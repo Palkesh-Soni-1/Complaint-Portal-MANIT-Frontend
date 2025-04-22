@@ -232,7 +232,7 @@ export default function IntermediateManageComplaints() {
   }
 
   return (
-    <div className="max-w-[1100px] mx-auto my-4 md:my-6 max-sm:px-2">
+    <div className="max-w-[1200px] mx-auto my-4 md:my-6 max-sm:px-2">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 md:p-4 rounded-t-lg">
         <h2 className="text-lg md:text-xl text-center md:text-left font-bold text-gray-100">
           Manage Complaints
